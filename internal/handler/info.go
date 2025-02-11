@@ -2,7 +2,7 @@ package handler
 
 import (
 	"net/http"
-	
+
 	"github.com/senyabanana/avito-shop-service/internal/entity"
 
 	"github.com/gin-gonic/gin"
@@ -14,7 +14,7 @@ func (h *Handler) getInfo(c *gin.Context) {
 		return
 	}
 
-	info, err := h.services.UserTransaction.GetUserInfo(userID)
+	info, err := h.services.Transaction.GetUserInfo(userID)
 	if err != nil {
 		entity.NewErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return

@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/senyabanana/avito-shop-service/internal/database"
@@ -63,4 +64,40 @@ func (r *UserTransactionPostgres) GetSentTransactions(userID int) ([]entity.Tran
 	err := r.db.Select(&sent, query, userID)
 
 	return sent, err
+}
+
+func (r *UserTransactionPostgres) TransferCoins(fromUserId, toUserId, amount int) error {
+	tx, err := r.db.Beginx()
+	if err != nil {
+		return err
+	}
+
+	createSenderQuery := fmt.Sprintf("UPDATE %s SET coins = coins-$1 WHERE id=$2 AND coins>=$1", database.UsersTable)
+	res, err := tx.Exec(createSenderQuery, amount, fromUserId)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	rowsAffected, _ := res.RowsAffected()
+	if rowsAffected == 0 {
+		tx.Rollback()
+		return errors.New("insufficient balance")
+	}
+
+	createRecipientQuery := fmt.Sprintf("UPDATE %s SET coins = coins+$1 WHERE id=$2", database.UsersTable)
+	_, err = tx.Exec(createRecipientQuery, amount, toUserId)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	createTransactionQuery := fmt.Sprintf("INSERT INTO %s (from_user, to_user, amount) VALUES ($1, $2, $3)", database.TransactionsTable)
+	_, err = tx.Exec(createTransactionQuery, fromUserId, toUserId, amount)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	return tx.Commit()
 }

@@ -16,6 +16,7 @@ type UserTransaction interface {
 	GetUserInventory(userID int) ([]entity.InventoryItem, error)
 	GetReceivedTransactions(userID int) ([]entity.TransactionDetail, error)
 	GetSentTransactions(userID int) ([]entity.TransactionDetail, error)
+	TransferCoins(fromUserId, toUserId, amount int) error
 }
 
 type Inventory interface {

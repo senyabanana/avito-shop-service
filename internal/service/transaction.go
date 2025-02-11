@@ -1,38 +1,41 @@
 package service
 
 import (
+	"errors"
+
 	"github.com/senyabanana/avito-shop-service/internal/entity"
 	"github.com/senyabanana/avito-shop-service/internal/repository"
 )
 
-type UserTransactionService struct {
-	repo repository.UserTransaction
+type TransactionService struct {
+	authRepo repository.Authorization
+	userRepo repository.UserTransaction
 }
 
-func NewTransactionService(repo repository.UserTransaction) *UserTransactionService {
-	return &UserTransactionService{repo: repo}
+func NewTransactionService(authRepo repository.Authorization, userRepo repository.UserTransaction) *TransactionService {
+	return &TransactionService{authRepo: authRepo, userRepo: userRepo}
 }
 
-func (s *UserTransactionService) GetUserInfo(userID int) (entity.InfoResponse, error) {
+func (s *TransactionService) GetUserInfo(userID int) (entity.InfoResponse, error) {
 	var info entity.InfoResponse
 	var err error
 
-	info.Coins, err = s.repo.GetUserBalance(userID)
+	info.Coins, err = s.userRepo.GetUserBalance(userID)
 	if err != nil {
 		return entity.InfoResponse{}, err
 	}
 
-	info.Inventory, err = s.repo.GetUserInventory(userID)
+	info.Inventory, err = s.userRepo.GetUserInventory(userID)
 	if err != nil {
 		return entity.InfoResponse{}, err
 	}
 
-	info.CoinHistory.Received, err = s.repo.GetReceivedTransactions(userID)
+	info.CoinHistory.Received, err = s.userRepo.GetReceivedTransactions(userID)
 	if err != nil {
 		return entity.InfoResponse{}, err
 	}
 
-	info.CoinHistory.Sent, err = s.repo.GetSentTransactions(userID)
+	info.CoinHistory.Sent, err = s.userRepo.GetSentTransactions(userID)
 	if err != nil {
 		return entity.InfoResponse{}, err
 	}
@@ -49,4 +52,31 @@ func (s *UserTransactionService) GetUserInfo(userID int) (entity.InfoResponse, e
 	}
 
 	return info, nil
+}
+
+func (s *TransactionService) SendCoin(fromUserID int, toUsername string, amount int) error {
+	toUser, err := s.authRepo.GetUser(toUsername)
+	if err != nil {
+		return errors.New("recipient not found")
+	}
+
+	toUserId := toUser.ID
+	if fromUserID == toUserId {
+		return errors.New("cannot send coins to yourself")
+	}
+
+	balance, err := s.userRepo.GetUserBalance(fromUserID)
+	if err != nil {
+		return err
+	}
+	if balance < amount {
+		return errors.New("insufficient balance")
+	}
+
+	err = s.userRepo.TransferCoins(fromUserID, toUserId, amount)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
