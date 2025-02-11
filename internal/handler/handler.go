@@ -17,12 +17,19 @@ func NewHandler(services *service.Service) *Handler {
 func (h *Handler) InitRoutes() *gin.Engine {
 	router := gin.New()
 
+	router.Use(gin.Logger())
+	router.Use(gin.Recovery())
+
 	api := router.Group("/api")
 	{
-		api.POST("/auth", h.signUp)
-		api.GET("/info", h.getInfo)
-		api.POST("/sendCoin", h.sendCoin)
-		api.GET("/buy/:item", h.buyItem)
+		api.POST("/auth", h.authenticate)
+
+		protected := api.Group("/", h.userIdentity)
+		{
+			protected.GET("/info", h.getInfo)
+			protected.POST("/sendCoin", h.sendCoin)
+			protected.GET("/buy/:item", h.buyItem)
+		}
 	}
 
 	return router

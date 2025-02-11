@@ -1,8 +1,14 @@
 package repository
 
-import "github.com/jmoiron/sqlx"
+import (
+	"github.com/senyabanana/avito-shop-service/internal/entity"
+
+	"github.com/jmoiron/sqlx"
+)
 
 type Authorization interface {
+	CreateUser(user entity.User) (int, error)
+	GetUser(username string) (entity.User, error)
 }
 
 type Transaction interface {
@@ -18,5 +24,7 @@ type Repository struct {
 }
 
 func NewRepository(db *sqlx.DB) *Repository {
-	return &Repository{}
+	return &Repository{
+		Authorization: NewAuthPostgres(db),
+	}
 }
