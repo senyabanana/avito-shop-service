@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"errors"
 	"net/http"
 	"strings"
 
@@ -11,7 +12,7 @@ import (
 
 const (
 	authorizationHeader = "Authorization"
-	userCtx             = "userId"
+	userCtx             = "userID"
 )
 
 func (h *Handler) userIdentity(c *gin.Context) {
@@ -27,11 +28,27 @@ func (h *Handler) userIdentity(c *gin.Context) {
 		return
 	}
 
-	userId, err := h.services.Authorization.ParseToken(headerParts[1])
+	userID, err := h.services.Authorization.ParseToken(headerParts[1])
 	if err != nil {
-		entity.NewErrorResponse(c, http.StatusUnauthorized, err.Error())
+		entity.NewErrorResponse(c, http.StatusUnauthorized, "invalid or expired token")
 		return
 	}
 
-	c.Set(userCtx, userId)
+	c.Set(userCtx, userID)
+}
+
+func getUserID(c *gin.Context) (int, error) {
+	id, ok := c.Get(userCtx)
+	if !ok {
+		entity.NewErrorResponse(c, http.StatusInternalServerError, "user id not found")
+		return 0, errors.New("user id not found")
+	}
+
+	idInt, ok := id.(int)
+	if !ok {
+		entity.NewErrorResponse(c, http.StatusInternalServerError, "user id is of invalid type")
+		return 0, errors.New("user id is of invalid type")
+	}
+
+	return idInt, nil
 }

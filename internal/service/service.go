@@ -12,7 +12,8 @@ type Authorization interface {
 	ParseToken(accessToken string) (int, error)
 }
 
-type Transaction interface {
+type UserTransaction interface {
+	GetUserInfo(userID int) (entity.InfoResponse, error)
 }
 
 type Inventory interface {
@@ -20,12 +21,13 @@ type Inventory interface {
 
 type Service struct {
 	Authorization
-	Transaction
+	UserTransaction
 	Inventory
 }
 
 func NewService(repos *repository.Repository) *Service {
 	return &Service{
-		Authorization: NewAuthService(repos.Authorization),
+		Authorization:   NewAuthService(repos.Authorization),
+		UserTransaction: NewTransactionService(repos.UserTransaction),
 	}
 }

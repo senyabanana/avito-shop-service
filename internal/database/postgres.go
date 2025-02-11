@@ -7,9 +7,10 @@ import (
 )
 
 const (
-	UsersTable             = "users"
-	CoinsTransactionsTable = "coins_transactions"
-	InventoryTable         = "inventory"
+	UsersTable        = "users"
+	TransactionsTable = "transactions"
+	InventoryTable    = "inventory"
+	MerchItemsTable   = "merch_items"
 )
 
 type Config struct {

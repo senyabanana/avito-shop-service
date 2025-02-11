@@ -1,7 +1,7 @@
 package service
 
 import (
-	"crypto/sha1"
+	"crypto/sha256"
 	"errors"
 	"fmt"
 	"time"
@@ -79,10 +79,8 @@ func (s *AuthService) GenerateToken(username, password string) (string, error) {
 }
 
 func generatePasswordHash(password string) string {
-	hash := sha1.New()
-	hash.Write([]byte(password))
-
-	return fmt.Sprintf("%x", hash.Sum([]byte(salt)))
+	hash := sha256.Sum256([]byte(password + salt))
+	return fmt.Sprintf("%x", hash)
 }
 
 func (s *AuthService) ParseToken(accessToken string) (int, error) {
