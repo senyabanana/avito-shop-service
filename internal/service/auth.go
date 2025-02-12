@@ -10,6 +10,7 @@ import (
 	"github.com/senyabanana/avito-shop-service/internal/repository"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -25,15 +26,20 @@ type tokenClaims struct {
 
 type AuthService struct {
 	repo repository.Authorization
+	log  *logrus.Logger
 }
 
-func NewAuthService(repo repository.Authorization) *AuthService {
-	return &AuthService{repo: repo}
+func NewAuthService(repo repository.Authorization, log *logrus.Logger) *AuthService {
+	return &AuthService{
+		repo: repo,
+		log:  log,
+	}
 }
 
 func (s *AuthService) GetUser(username string) (entity.User, error) {
 	user, err := s.repo.GetUser(username)
 	if err != nil {
+		s.log.Warnf("User not found: %s", username)
 		return entity.User{}, err
 	}
 
@@ -50,20 +56,24 @@ func (s *AuthService) CreateUser(username, password string) error {
 	}
 
 	if _, err := s.repo.CreateUser(newUser); err != nil {
+		s.log.Errorf("Failed to create user %s: %v", username, err)
 		return err
 	}
 
+	s.log.Infof("User %s created successfully", username)
 	return nil
 }
 
 func (s *AuthService) GenerateToken(username, password string) (string, error) {
 	user, err := s.repo.GetUser(username)
 	if err != nil {
+		s.log.Warnf("GenerateToken: User %s not found", username)
 		return "", err
 	}
 
 	hashedPassword := generatePasswordHash(password)
 	if user.Password != hashedPassword {
+		s.log.Warnf("GenerateToken: Invalid password for user %s", username)
 		return "", errors.New("incorrect password")
 	}
 
@@ -75,6 +85,7 @@ func (s *AuthService) GenerateToken(username, password string) (string, error) {
 		user.ID,
 	})
 
+	s.log.Infof("Generated token for user %s", username)
 	return token.SignedString([]byte(signingKey))
 }
 
@@ -86,17 +97,20 @@ func generatePasswordHash(password string) string {
 func (s *AuthService) ParseToken(accessToken string) (int, error) {
 	token, err := jwt.ParseWithClaims(accessToken, &tokenClaims{}, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			s.log.Warn("ParseToken: invalid signing method")
 			return nil, errors.New("invalid signing method")
 		}
 
 		return []byte(signingKey), nil
 	})
 	if err != nil {
+		s.log.Warnf("ParseToken: failed to parse token: %s", err.Error())
 		return 0, err
 	}
 
 	claims, ok := token.Claims.(*tokenClaims)
 	if !ok {
+		s.log.Warn("ParseToken: token claims are invalid")
 		return 0, errors.New("token claims are not of type *tokenClaims")
 	}
 

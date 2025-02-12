@@ -4,16 +4,20 @@ import (
 	"github.com/senyabanana/avito-shop-service/internal/service"
 
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 )
 
 type Handler struct {
 	services *service.Service
+	log      *logrus.Logger
 }
 
-func NewHandler(services *service.Service) *Handler {
-	return &Handler{services: services}
+func NewHandler(services *service.Service, log *logrus.Logger) *Handler {
+	return &Handler{
+		services: services,
+		log:      log,
+	}
 }
-
 func (h *Handler) InitRoutes() *gin.Engine {
 	router := gin.New()
 

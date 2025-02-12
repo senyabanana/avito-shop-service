@@ -1,55 +1,59 @@
 package main
 
 import (
+	"context"
 	"os"
+	"os/signal"
+	"syscall"
 
+	"github.com/senyabanana/avito-shop-service/internal/config"
 	"github.com/senyabanana/avito-shop-service/internal/database"
 	"github.com/senyabanana/avito-shop-service/internal/handler"
+	"github.com/senyabanana/avito-shop-service/internal/logger"
 	"github.com/senyabanana/avito-shop-service/internal/repository"
 	"github.com/senyabanana/avito-shop-service/internal/server"
 	"github.com/senyabanana/avito-shop-service/internal/service"
-
-	"github.com/joho/godotenv"
-	_ "github.com/lib/pq"
-	"github.com/sirupsen/logrus"
-	"github.com/spf13/viper"
 )
 
 func main() {
-	logrus.SetFormatter(new(logrus.JSONFormatter))
+	log := logger.NewLogger()
 
-	if err := initConfig(); err != nil {
-		logrus.Fatalf("error initializating configs: %s", err.Error())
-	}
-
-	if err := godotenv.Load(); err != nil {
-		logrus.Fatalf("error loading env variables: %s", err.Error())
-	}
-
-	db, err := database.NewPostgresDB(database.Config{
-		Host:     viper.GetString("db.host"),
-		Port:     viper.GetString("db.port"),
-		Username: viper.GetString("db.username"),
-		Password: os.Getenv("DB_PASSWORD"),
-		DBName:   viper.GetString("db.dbname"),
-		SSLMode:  viper.GetString("db.sslmode"),
-	})
+	cfg, err := config.LoadConfig(".")
 	if err != nil {
-		logrus.Fatalf("failed to initialize db: %s", err.Error())
+		log.Fatalf("error initializing configs: %s", err.Error())
+	}
+
+	db, err := database.NewPostgresDB(cfg)
+	if err != nil {
+		log.Fatalf("failed to initialize db: %s", err.Error())
 	}
 
 	repos := repository.NewRepository(db)
-	services := service.NewService(repos)
-	handlers := handler.NewHandler(services)
+	services := service.NewService(repos, log)
+	handlers := handler.NewHandler(services, log)
 
 	srv := new(server.Server)
-	if err := srv.Run(viper.GetString("port"), handlers.InitRoutes()); err != nil {
-		logrus.Fatalf("error occured while running http server: %s", err.Error())
-	}
-}
+	go func() {
+		if err := srv.Run(cfg.ServerPort, handlers.InitRoutes()); err != nil {
+			log.Fatalf("error occured while running http server: %s", err.Error())
+		}
+	}()
 
-func initConfig() error {
-	viper.AddConfigPath("config")
-	viper.SetConfigName("config")
-	return viper.ReadInConfig()
+	log.Info("Server started on port ", cfg.ServerPort)
+
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGTERM, syscall.SIGINT)
+	<-quit
+
+	log.Info("Server shutting down...")
+
+	if err := srv.Shutdown(context.Background()); err != nil {
+		log.Errorf("error occured on server shutting down: %s", err.Error())
+	}
+
+	if err := db.Close(); err != nil {
+		log.Errorf("error occured on db connection close: %s", err.Error())
+	}
+
+	log.Info("Server stopped gracefully")
 }

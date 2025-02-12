@@ -11,22 +11,22 @@ import (
 func (h *Handler) authenticate(c *gin.Context) {
 	var input entity.AuthRequest
 
-	if err := c.BindJSON(&input); err != nil {
-		entity.NewErrorResponse(c, http.StatusBadRequest, err.Error())
+	if err := c.ShouldBindJSON(&input); err != nil {
+		entity.NewErrorResponse(c, h.log, http.StatusBadRequest, "invalid request format")
 		return
 	}
 
 	_, err := h.services.Authorization.GetUser(input.Username)
 	if err != nil {
 		if err := h.services.Authorization.CreateUser(input.Username, input.Password); err != nil {
-			entity.NewErrorResponse(c, http.StatusBadRequest, err.Error())
+			entity.NewErrorResponse(c, h.log, http.StatusBadRequest, err.Error())
 			return
 		}
 	}
 
 	token, err := h.services.Authorization.GenerateToken(input.Username, input.Password)
 	if err != nil {
-		entity.NewErrorResponse(c, http.StatusUnauthorized, err.Error())
+		entity.NewErrorResponse(c, h.log, http.StatusUnauthorized, err.Error())
 		return
 	}
 

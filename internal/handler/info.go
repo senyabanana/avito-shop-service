@@ -2,21 +2,21 @@ package handler
 
 import (
 	"net/http"
-
+	
 	"github.com/senyabanana/avito-shop-service/internal/entity"
 
 	"github.com/gin-gonic/gin"
 )
 
 func (h *Handler) getInfo(c *gin.Context) {
-	userID, err := getUserID(c)
+	userID, err := h.getUserID(c)
 	if err != nil {
 		return
 	}
 
 	info, err := h.services.Transaction.GetUserInfo(userID)
 	if err != nil {
-		entity.NewErrorResponse(c, http.StatusInternalServerError, err.Error())
+		entity.NewErrorResponse(c, h.log, http.StatusInternalServerError, err.Error())
 		return
 	}
 

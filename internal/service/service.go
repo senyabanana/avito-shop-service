@@ -3,6 +3,8 @@ package service
 import (
 	"github.com/senyabanana/avito-shop-service/internal/entity"
 	"github.com/senyabanana/avito-shop-service/internal/repository"
+	
+	"github.com/sirupsen/logrus"
 )
 
 type Authorization interface {
@@ -27,10 +29,10 @@ type Service struct {
 	Inventory
 }
 
-func NewService(repos *repository.Repository) *Service {
+func NewService(repos *repository.Repository, log *logrus.Logger) *Service {
 	return &Service{
-		Authorization: NewAuthService(repos.Authorization),
-		Transaction:   NewTransactionService(repos.Authorization, repos.UserTransaction),
-		Inventory:     NewInventoryService(repos.UserTransaction, repos.Inventory),
+		Authorization: NewAuthService(repos.Authorization, log),
+		Transaction:   NewTransactionService(repos.Authorization, repos.UserTransaction, log),
+		Inventory:     NewInventoryService(repos.UserTransaction, repos.Inventory, log),
 	}
 }
