@@ -20,6 +20,8 @@ type UserTransaction interface {
 }
 
 type Inventory interface {
+	GetItem(itemName string) (entity.MerchItems, error)
+	PurchaseItem(userID, merchID, price int) error
 }
 
 type Repository struct {
@@ -32,5 +34,6 @@ func NewRepository(db *sqlx.DB) *Repository {
 	return &Repository{
 		Authorization:   NewAuthPostgres(db),
 		UserTransaction: NewUserTransactionPostgres(db),
+		Inventory:       NewInventoryPostgres(db),
 	}
 }

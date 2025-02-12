@@ -18,6 +18,7 @@ type Transaction interface {
 }
 
 type Inventory interface {
+	BuyItem(userID int, itemName string) error
 }
 
 type Service struct {
@@ -30,5 +31,6 @@ func NewService(repos *repository.Repository) *Service {
 	return &Service{
 		Authorization: NewAuthService(repos.Authorization),
 		Transaction:   NewTransactionService(repos.Authorization, repos.UserTransaction),
+		Inventory:     NewInventoryService(repos.UserTransaction, repos.Inventory),
 	}
 }
