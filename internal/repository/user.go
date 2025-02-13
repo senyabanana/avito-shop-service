@@ -56,7 +56,7 @@ func (r *UserPostgres) UpdateCoins(ctx context.Context, userID, amount int) erro
 
 	rowsAffected, _ := res.RowsAffected()
 	if rowsAffected == 0 {
-		return nil
+		return entity.ErrInsufficientBalance
 	}
 
 	return nil

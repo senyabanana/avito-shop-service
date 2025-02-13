@@ -1,0 +1,249 @@
+package repository
+
+import (
+	"context"
+	"errors"
+	"testing"
+
+	"github.com/senyabanana/avito-shop-service/internal/entity"
+
+	"github.com/DATA-DOG/go-sqlmock"
+	"github.com/jmoiron/sqlx"
+	"github.com/stretchr/testify/assert"
+)
+
+func TestUserPostgres_CreateUser(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	assert.NoError(t, err)
+	defer db.Close()
+
+	sqlxDB := sqlx.NewDb(db, "postgres")
+	repo := NewUserPostgres(sqlxDB)
+
+	tests := []struct {
+		name          string
+		inputUser     entity.User
+		mockBehavior  func()
+		expectedID    int
+		expectedError error
+	}{
+		{
+			name: "Success",
+			inputUser: entity.User{
+				Username: "testuser",
+				Password: "testpass",
+				Coins:    1000,
+			},
+			mockBehavior: func() {
+				mock.ExpectQuery("INSERT INTO users").
+					WithArgs("testuser", "testpass", 1000).
+					WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
+			},
+			expectedID:    1,
+			expectedError: nil,
+		},
+		{
+			name: "Username already exists",
+			inputUser: entity.User{
+				Username: "existuser",
+				Password: "testpass",
+				Coins:    1000,
+			},
+			mockBehavior: func() {
+				mock.ExpectQuery("INSERT INTO users").
+					WithArgs("existuser", "testpass", 1000).
+					WillReturnError(errors.New("pq: duplicate key value violates unique constraint"))
+			},
+			expectedID:    0,
+			expectedError: errors.New("pq: duplicate key value violates unique constraint"),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tt.mockBehavior()
+
+			ctx := context.Background()
+			id, err := repo.CreateUser(ctx, tt.inputUser)
+
+			assert.Equal(t, tt.expectedID, id)
+			assert.Equal(t, tt.expectedError, err)
+			assert.NoError(t, mock.ExpectationsWereMet())
+		})
+	}
+}
+
+func TestUserPostgres_GetUser(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	assert.NoError(t, err)
+	defer db.Close()
+
+	sqlxDB := sqlx.NewDb(db, "postgres")
+	repo := NewUserPostgres(sqlxDB)
+
+	tests := []struct {
+		name          string
+		username      string
+		mockBehavior  func()
+		expectedUser  entity.User
+		expectedError error
+	}{
+		{
+			name:     "Success",
+			username: "testuser",
+			mockBehavior: func() {
+				mock.ExpectQuery("SELECT id, username, users.password_hash, coins FROM users WHERE username").
+					WithArgs("testuser").
+					WillReturnRows(sqlmock.NewRows([]string{"id", "username", "password_hash", "coins"}).
+						AddRow(1, "testuser", "testpass", 1000))
+			},
+			expectedUser: entity.User{
+				ID:       1,
+				Username: "testuser",
+				Password: "testpass",
+				Coins:    1000,
+			},
+			expectedError: nil,
+		},
+		{
+			name:     "User Not Found",
+			username: "unknown_user",
+			mockBehavior: func() {
+				mock.ExpectQuery("SELECT id, username, users.password_hash, coins FROM users WHERE username").
+					WithArgs("unknown_user").
+					WillReturnError(errors.New("sql: no rows in result set"))
+			},
+			expectedUser:  entity.User{},
+			expectedError: errors.New("sql: no rows in result set"),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tt.mockBehavior()
+
+			ctx := context.Background()
+			user, err := repo.GetUser(ctx, tt.username)
+
+			assert.Equal(t, tt.expectedUser, user)
+			assert.Equal(t, tt.expectedError, err)
+			assert.NoError(t, mock.ExpectationsWereMet())
+		})
+	}
+}
+
+func TestUserPostgres_GetUserBalance(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	assert.NoError(t, err)
+	defer db.Close()
+
+	sqlxDB := sqlx.NewDb(db, "postgres")
+	repo := NewUserPostgres(sqlxDB)
+
+	tests := []struct {
+		name          string
+		userID        int
+		mockBehavior  func()
+		expectedCoins int
+		expectedError error
+	}{
+		{
+			name:   "Success",
+			userID: 1,
+			mockBehavior: func() {
+				mock.ExpectQuery("SELECT coins FROM users WHERE id").
+					WithArgs(1).
+					WillReturnRows(sqlmock.NewRows([]string{"coins"}).AddRow(500))
+			},
+			expectedCoins: 500,
+			expectedError: nil,
+		},
+		{
+			name:   "Error in Query",
+			userID: 2,
+			mockBehavior: func() {
+				mock.ExpectQuery("SELECT coins FROM users WHERE id").
+					WithArgs(2).
+					WillReturnError(errors.New("database error"))
+			},
+			expectedCoins: 0,
+			expectedError: errors.New("database error"),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tt.mockBehavior()
+
+			ctx := context.Background()
+			coins, err := repo.GetUserBalance(ctx, tt.userID)
+
+			assert.Equal(t, tt.expectedCoins, coins)
+			assert.Equal(t, tt.expectedError, err)
+			assert.NoError(t, mock.ExpectationsWereMet())
+		})
+	}
+}
+
+func TestUserPostgres_UpdateCoins(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	assert.NoError(t, err)
+	defer db.Close()
+
+	sqlxDB := sqlx.NewDb(db, "postgres")
+	repo := NewUserPostgres(sqlxDB)
+
+	tests := []struct {
+		name          string
+		userID        int
+		amount        int
+		mockBehavior  func()
+		expectedError error
+	}{
+		{
+			name:   "Success - Increase Coins",
+			userID: 1,
+			amount: 50,
+			mockBehavior: func() {
+				mock.ExpectExec("UPDATE users SET coins = coins [+-]").
+					WithArgs(50, 1).
+					WillReturnResult(sqlmock.NewResult(1, 1))
+			},
+			expectedError: nil,
+		},
+		{
+			name:   "Success - Decrease Coins",
+			userID: 1,
+			amount: -50,
+			mockBehavior: func() {
+				mock.ExpectExec("UPDATE users SET coins = coins [+-]").
+					WithArgs(-50, 1).
+					WillReturnResult(sqlmock.NewResult(1, 1))
+			},
+			expectedError: nil,
+		},
+		{
+			name:   "Insufficient Balance",
+			userID: 2,
+			amount: 1000,
+			mockBehavior: func() {
+				mock.ExpectExec("UPDATE users SET coins = coins [+-]").
+					WithArgs(1000, 2).
+					WillReturnResult(sqlmock.NewResult(1, 0))
+			},
+			expectedError: errors.New("insufficient balance"),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tt.mockBehavior()
+
+			ctx := context.Background()
+			err := repo.UpdateCoins(ctx, tt.userID, tt.amount)
+
+			assert.Equal(t, tt.expectedError, err)
+			assert.NoError(t, mock.ExpectationsWereMet())
+		})
+	}
+}
