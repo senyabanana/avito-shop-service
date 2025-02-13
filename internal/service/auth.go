@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"crypto/sha256"
-	"errors"
 	"fmt"
 	"time"
 
@@ -16,9 +15,8 @@ import (
 )
 
 const (
-	salt       = "random_salt_string"
-	signingKey = "super_secret_key"
-	tokenTTL   = 12 * time.Hour
+	salt     = "random_salt_string"
+	tokenTTL = 12 * time.Hour
 )
 
 type tokenClaims struct {
@@ -27,16 +25,18 @@ type tokenClaims struct {
 }
 
 type AuthService struct {
-	userRepo  repository.UserRepository
-	trManager *manager.Manager
-	log       *logrus.Logger
+	userRepo     repository.UserRepository
+	trManager    *manager.Manager
+	jwtSecretKey string
+	log          *logrus.Logger
 }
 
-func NewAuthService(repo repository.UserRepository, trManager *manager.Manager, log *logrus.Logger) *AuthService {
+func NewAuthService(repo repository.UserRepository, trManager *manager.Manager, jwtSecretKey string, log *logrus.Logger) *AuthService {
 	return &AuthService{
-		userRepo:  repo,
-		trManager: trManager,
-		log:       log,
+		userRepo:     repo,
+		trManager:    trManager,
+		jwtSecretKey: jwtSecretKey,
+		log:          log,
 	}
 }
 
@@ -44,7 +44,7 @@ func (s *AuthService) GetUser(ctx context.Context, username string) (entity.User
 	user, err := s.userRepo.GetUser(ctx, username)
 	if err != nil {
 		s.log.Warnf("User not found: %s", username)
-		return entity.User{}, err
+		return entity.User{}, entity.ErrUserNotFound
 	}
 
 	return user, nil
@@ -81,7 +81,7 @@ func (s *AuthService) GenerateToken(ctx context.Context, username, password stri
 	hashedPassword := generatePasswordHash(password)
 	if user.Password != hashedPassword {
 		s.log.Warnf("GenerateToken: Invalid password for user %s", username)
-		return "", errors.New("incorrect password")
+		return "", entity.ErrIncorrectPassword
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, &tokenClaims{
@@ -93,17 +93,17 @@ func (s *AuthService) GenerateToken(ctx context.Context, username, password stri
 	})
 
 	s.log.Infof("Generated token for user %s", username)
-	return token.SignedString([]byte(signingKey))
+	return token.SignedString([]byte(s.jwtSecretKey))
 }
 
 func (s *AuthService) ParseToken(accessToken string) (int, error) {
 	token, err := jwt.ParseWithClaims(accessToken, &tokenClaims{}, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			s.log.Warn("ParseToken: invalid signing method")
-			return nil, errors.New("invalid signing method")
+			return nil, entity.ErrInvalidSigningMethod
 		}
 
-		return []byte(signingKey), nil
+		return []byte(s.jwtSecretKey), nil
 	})
 	if err != nil {
 		s.log.Warnf("ParseToken: failed to parse token: %s", err.Error())
@@ -113,7 +113,7 @@ func (s *AuthService) ParseToken(accessToken string) (int, error) {
 	claims, ok := token.Claims.(*tokenClaims)
 	if !ok {
 		s.log.Warn("ParseToken: token claims are invalid")
-		return 0, errors.New("token claims are not of type *tokenClaims")
+		return 0, entity.ErrInvalidTokenClaimsType
 	}
 
 	return claims.UserID, nil

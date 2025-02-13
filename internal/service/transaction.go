@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"errors"
 
 	"github.com/senyabanana/avito-shop-service/internal/entity"
 	"github.com/senyabanana/avito-shop-service/internal/repository"
@@ -94,13 +93,13 @@ func (s *TransactionService) SendCoin(ctx context.Context, fromUserID int, toUse
 		toUser, err := s.userRepo.GetUser(ctx, toUsername)
 		if err != nil {
 			s.log.Warnf("SendCoin failed: recipient %s not found", toUsername)
-			return errors.New("recipient not found")
+			return entity.ErrRecipientNotFound
 		}
 
 		toUserID := toUser.ID
 		if fromUserID == toUserID {
 			s.log.Warnf("SendCoin failed: user %d tried to send coins to themselves", fromUserID)
-			return errors.New("cannot send coins to yourself")
+			return entity.ErrSendThemselves
 		}
 
 		balance, err := s.userRepo.GetUserBalance(ctx, fromUserID)
@@ -110,7 +109,7 @@ func (s *TransactionService) SendCoin(ctx context.Context, fromUserID int, toUse
 		}
 		if balance < amount {
 			s.log.Warnf("SendCoin failed: insufficient balance for user %d", fromUserID)
-			return errors.New("insufficient balance")
+			return entity.ErrInsufficientBalance
 		}
 
 		err = s.userRepo.UpdateCoins(ctx, fromUserID, -amount)

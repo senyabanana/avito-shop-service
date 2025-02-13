@@ -25,7 +25,7 @@ func (h *Handler) sendCoin(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, map[string]interface{}{
-		"status": "ok",
+	c.JSON(http.StatusOK, entity.StatusResponse{
+		Status: "coins were successfully sent to the user",
 	})
 }

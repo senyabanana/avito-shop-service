@@ -16,7 +16,7 @@ import (
 	"github.com/senyabanana/avito-shop-service/internal/repository"
 	"github.com/senyabanana/avito-shop-service/internal/server"
 	"github.com/senyabanana/avito-shop-service/internal/service"
-	
+
 	trmsqlx "github.com/avito-tech/go-transaction-manager/drivers/sqlx/v2"
 )
 
@@ -36,7 +36,7 @@ func main() {
 
 	trManager := manager.Must(trmsqlx.NewDefaultFactory(db))
 	repos := repository.NewRepository(db)
-	services := service.NewService(repos, trManager, log)
+	services := service.NewService(repos, trManager, cfg.JwtSecretKey, log)
 	handlers := handler.NewHandler(services, log)
 
 	srv := new(server.Server)

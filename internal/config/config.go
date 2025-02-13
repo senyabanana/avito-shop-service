@@ -10,6 +10,7 @@ type Config struct {
 	PostgresPassword string `mapstructure:"POSTGRES_PASSWORD"`
 	PostgresDB       string `mapstructure:"POSTGRES_DB"`
 	SSLMode          string `mapstructure:"SSLMODE"`
+	JwtSecretKey     string `mapstructure:"JWTKEY"`
 }
 
 func LoadConfig(path string) (cfg *Config, err error) {

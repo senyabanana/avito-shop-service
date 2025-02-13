@@ -32,9 +32,9 @@ type Service struct {
 	Inventory
 }
 
-func NewService(repos *repository.Repository, trManager *manager.Manager, log *logrus.Logger) *Service {
+func NewService(repos *repository.Repository, trManager *manager.Manager, jwtSecretKey string, log *logrus.Logger) *Service {
 	return &Service{
-		Authorization: NewAuthService(repos.UserRepository, trManager, log),
+		Authorization: NewAuthService(repos.UserRepository, trManager, jwtSecretKey, log),
 		Transaction:   NewTransactionService(repos.UserRepository, repos.TransactionRepository, repos.InventoryRepository, trManager, log),
 		Inventory:     NewInventoryService(repos.UserRepository, repos.InventoryRepository, trManager, log),
 	}

@@ -2,8 +2,8 @@ package service
 
 import (
 	"context"
-	"errors"
 
+	"github.com/senyabanana/avito-shop-service/internal/entity"
 	"github.com/senyabanana/avito-shop-service/internal/repository"
 
 	"github.com/avito-tech/go-transaction-manager/trm/v2/manager"
@@ -37,7 +37,7 @@ func (s *InventoryService) BuyItem(ctx context.Context, userID int, itemName str
 		item, err := s.inventoryRepo.GetItem(ctx, itemName)
 		if err != nil {
 			s.log.Warnf("BuyItem failed: item %s not found", itemName)
-			return errors.New("item not found")
+			return entity.ErrItemNotFound
 		}
 
 		balance, err := s.userRepo.GetUserBalance(ctx, userID)
@@ -47,7 +47,7 @@ func (s *InventoryService) BuyItem(ctx context.Context, userID int, itemName str
 		}
 		if balance < item.Price {
 			s.log.Warnf("BuyItem failed: insufficient balance for user %d", userID)
-			return errors.New("insufficient balance")
+			return entity.ErrInsufficientBalance
 		}
 
 		err = s.userRepo.UpdateCoins(ctx, userID, -item.Price)
