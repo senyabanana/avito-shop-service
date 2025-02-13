@@ -8,6 +8,8 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
+//go:generate mockgen -source=repository.go -destination=mocks/mock.go
+
 type UserRepository interface {
 	CreateUser(ctx context.Context, user entity.User) (int, error)
 	GetUser(ctx context.Context, username string) (entity.User, error)
