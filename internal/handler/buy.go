@@ -20,7 +20,7 @@ func (h *Handler) buyItem(c *gin.Context) {
 		return
 	}
 
-	err = h.services.Inventory.BuyItem(userID, item)
+	err = h.services.Inventory.BuyItem(c.Request.Context(), userID, item)
 	if err != nil {
 		entity.NewErrorResponse(c, h.log, http.StatusBadRequest, err.Error())
 		return

@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"crypto/sha256"
 	"errors"
 	"fmt"
@@ -9,6 +10,7 @@ import (
 	"github.com/senyabanana/avito-shop-service/internal/entity"
 	"github.com/senyabanana/avito-shop-service/internal/repository"
 
+	"github.com/avito-tech/go-transaction-manager/trm/v2/manager"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/sirupsen/logrus"
 )
@@ -25,19 +27,21 @@ type tokenClaims struct {
 }
 
 type AuthService struct {
-	repo repository.Authorization
-	log  *logrus.Logger
+	userRepo  repository.UserRepository
+	trManager *manager.Manager
+	log       *logrus.Logger
 }
 
-func NewAuthService(repo repository.Authorization, log *logrus.Logger) *AuthService {
+func NewAuthService(repo repository.UserRepository, trManager *manager.Manager, log *logrus.Logger) *AuthService {
 	return &AuthService{
-		repo: repo,
-		log:  log,
+		userRepo:  repo,
+		trManager: trManager,
+		log:       log,
 	}
 }
 
-func (s *AuthService) GetUser(username string) (entity.User, error) {
-	user, err := s.repo.GetUser(username)
+func (s *AuthService) GetUser(ctx context.Context, username string) (entity.User, error) {
+	user, err := s.userRepo.GetUser(ctx, username)
 	if err != nil {
 		s.log.Warnf("User not found: %s", username)
 		return entity.User{}, err
@@ -46,7 +50,7 @@ func (s *AuthService) GetUser(username string) (entity.User, error) {
 	return user, nil
 }
 
-func (s *AuthService) CreateUser(username, password string) error {
+func (s *AuthService) CreateUser(ctx context.Context, username, password string) error {
 	hashedPassword := generatePasswordHash(password)
 
 	newUser := entity.User{
@@ -55,17 +59,20 @@ func (s *AuthService) CreateUser(username, password string) error {
 		Coins:    1000,
 	}
 
-	if _, err := s.repo.CreateUser(newUser); err != nil {
-		s.log.Errorf("Failed to create user %s: %v", username, err)
-		return err
-	}
+	return s.trManager.Do(ctx, func(ctx context.Context) error {
+		_, err := s.userRepo.CreateUser(ctx, newUser)
+		if err != nil {
+			s.log.Errorf("Failed to create user %s: %v", username, err)
+			return err
+		}
 
-	s.log.Infof("User %s created successfully", username)
-	return nil
+		s.log.Infof("User %s created successfully", username)
+		return nil
+	})
 }
 
-func (s *AuthService) GenerateToken(username, password string) (string, error) {
-	user, err := s.repo.GetUser(username)
+func (s *AuthService) GenerateToken(ctx context.Context, username, password string) (string, error) {
+	user, err := s.userRepo.GetUser(ctx, username)
 	if err != nil {
 		s.log.Warnf("GenerateToken: User %s not found", username)
 		return "", err
@@ -89,11 +96,6 @@ func (s *AuthService) GenerateToken(username, password string) (string, error) {
 	return token.SignedString([]byte(signingKey))
 }
 
-func generatePasswordHash(password string) string {
-	hash := sha256.Sum256([]byte(password + salt))
-	return fmt.Sprintf("%x", hash)
-}
-
 func (s *AuthService) ParseToken(accessToken string) (int, error) {
 	token, err := jwt.ParseWithClaims(accessToken, &tokenClaims{}, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
@@ -115,4 +117,9 @@ func (s *AuthService) ParseToken(accessToken string) (int, error) {
 	}
 
 	return claims.UserID, nil
+}
+
+func generatePasswordHash(password string) string {
+	hash := sha256.Sum256([]byte(password + salt))
+	return fmt.Sprintf("%x", hash)
 }

@@ -1,7 +1,9 @@
 package database
 
 import (
+	"context"
 	"fmt"
+	"time"
 
 	"github.com/senyabanana/avito-shop-service/internal/config"
 
@@ -9,21 +11,19 @@ import (
 	_ "github.com/lib/pq"
 )
 
-const (
-	UsersTable        = "users"
-	TransactionsTable = "transactions"
-	InventoryTable    = "inventory"
-	MerchItemsTable   = "merch_items"
-)
+func NewPostgresDB(ctx context.Context, cfg *config.Config) (*sqlx.DB, error) {
+	dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
+		cfg.PostgresHost, cfg.PostgresPort, cfg.PostgresUser, cfg.PostgresPassword, cfg.PostgresDB, cfg.SSLMode)
 
-func NewPostgresDB(cfg *config.Config) (*sqlx.DB, error) {
-	db, err := sqlx.Open("postgres", fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
-		cfg.PostgresHost, cfg.PostgresPort, cfg.PostgresUser, cfg.PostgresPassword, cfg.PostgresDB, cfg.SSLMode))
+	db, err := sqlx.Open("postgres", dsn)
 	if err != nil {
 		return nil, err
 	}
-	err = db.Ping()
-	if err != nil {
+
+	pingCtx, cancel := context.WithTimeout(ctx, 3*time.Second)
+	defer cancel()
+
+	if err := db.PingContext(pingCtx); err != nil {
 		return nil, err
 	}
 	return db, nil

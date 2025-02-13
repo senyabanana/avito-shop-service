@@ -16,15 +16,15 @@ func (h *Handler) authenticate(c *gin.Context) {
 		return
 	}
 
-	_, err := h.services.Authorization.GetUser(input.Username)
+	_, err := h.services.Authorization.GetUser(c.Request.Context(), input.Username)
 	if err != nil {
-		if err := h.services.Authorization.CreateUser(input.Username, input.Password); err != nil {
+		if err := h.services.Authorization.CreateUser(c.Request.Context(), input.Username, input.Password); err != nil {
 			entity.NewErrorResponse(c, h.log, http.StatusBadRequest, err.Error())
 			return
 		}
 	}
 
-	token, err := h.services.Authorization.GenerateToken(input.Username, input.Password)
+	token, err := h.services.Authorization.GenerateToken(c.Request.Context(), input.Username, input.Password)
 	if err != nil {
 		entity.NewErrorResponse(c, h.log, http.StatusUnauthorized, err.Error())
 		return

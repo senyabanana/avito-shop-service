@@ -2,10 +2,13 @@ package main
 
 import (
 	"context"
+	"errors"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 
+	"github.com/avito-tech/go-transaction-manager/trm/v2/manager"
 	"github.com/senyabanana/avito-shop-service/internal/config"
 	"github.com/senyabanana/avito-shop-service/internal/database"
 	"github.com/senyabanana/avito-shop-service/internal/handler"
@@ -13,9 +16,12 @@ import (
 	"github.com/senyabanana/avito-shop-service/internal/repository"
 	"github.com/senyabanana/avito-shop-service/internal/server"
 	"github.com/senyabanana/avito-shop-service/internal/service"
+	
+	trmsqlx "github.com/avito-tech/go-transaction-manager/drivers/sqlx/v2"
 )
 
 func main() {
+	ctx := context.Background()
 	log := logger.NewLogger()
 
 	cfg, err := config.LoadConfig(".")
@@ -23,18 +29,21 @@ func main() {
 		log.Fatalf("error initializing configs: %s", err.Error())
 	}
 
-	db, err := database.NewPostgresDB(cfg)
+	db, err := database.NewPostgresDB(ctx, cfg)
 	if err != nil {
 		log.Fatalf("failed to initialize db: %s", err.Error())
 	}
 
+	trManager := manager.Must(trmsqlx.NewDefaultFactory(db))
 	repos := repository.NewRepository(db)
-	services := service.NewService(repos, log)
+	services := service.NewService(repos, trManager, log)
 	handlers := handler.NewHandler(services, log)
 
 	srv := new(server.Server)
+	ctx, cancel := context.WithCancel(ctx)
+
 	go func() {
-		if err := srv.Run(cfg.ServerPort, handlers.InitRoutes()); err != nil {
+		if err := srv.Run(cfg.ServerPort, handlers.InitRoutes()); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			log.Fatalf("error occured while running http server: %s", err.Error())
 		}
 	}()
@@ -46,6 +55,7 @@ func main() {
 	<-quit
 
 	log.Info("Server shutting down...")
+	cancel()
 
 	if err := srv.Shutdown(context.Background()); err != nil {
 		log.Errorf("error occured on server shutting down: %s", err.Error())

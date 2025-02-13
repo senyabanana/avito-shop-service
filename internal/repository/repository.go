@@ -1,39 +1,44 @@
 package repository
 
 import (
+	"context"
+
 	"github.com/senyabanana/avito-shop-service/internal/entity"
 
 	"github.com/jmoiron/sqlx"
 )
 
-type Authorization interface {
-	CreateUser(user entity.User) (int, error)
-	GetUser(username string) (entity.User, error)
+type UserRepository interface {
+	CreateUser(ctx context.Context, user entity.User) (int, error)
+	GetUser(ctx context.Context, username string) (entity.User, error)
+	GetUserBalance(ctx context.Context, userID int) (int, error)
+	UpdateCoins(ctx context.Context, userID, amount int) error
 }
 
-type UserTransaction interface {
-	GetUserBalance(userID int) (int, error)
-	GetUserInventory(userID int) ([]entity.InventoryItem, error)
-	GetReceivedTransactions(userID int) ([]entity.TransactionDetail, error)
-	GetSentTransactions(userID int) ([]entity.TransactionDetail, error)
-	TransferCoins(fromUserId, toUserId, amount int) error
+type TransactionRepository interface {
+	GetReceivedTransactions(ctx context.Context, userID int) ([]entity.TransactionDetail, error)
+	GetSentTransactions(ctx context.Context, userID int) ([]entity.TransactionDetail, error)
+	InsertTransaction(ctx context.Context, fromUserID, toUserID, amount int) error
 }
 
-type Inventory interface {
-	GetItem(itemName string) (entity.MerchItems, error)
-	PurchaseItem(userID, merchID, price int) error
+type InventoryRepository interface {
+	GetItem(ctx context.Context, itemName string) (entity.MerchItems, error)
+	GetUserInventory(ctx context.Context, userID int) ([]entity.InventoryItem, error)
+	GetInventoryItem(ctx context.Context, userID, merchID int) (int, error)
+	UpdateInventoryItem(ctx context.Context, userID, merchID int) error
+	InsertInventoryItem(ctx context.Context, userID, merchID int) error
 }
 
 type Repository struct {
-	Authorization
-	UserTransaction
-	Inventory
+	UserRepository
+	TransactionRepository
+	InventoryRepository
 }
 
 func NewRepository(db *sqlx.DB) *Repository {
 	return &Repository{
-		Authorization:   NewAuthPostgres(db),
-		UserTransaction: NewUserTransactionPostgres(db),
-		Inventory:       NewInventoryPostgres(db),
+		UserRepository:        NewUserPostgres(db),
+		TransactionRepository: NewTransactionPostgres(db),
+		InventoryRepository:   NewInventoryPostgres(db),
 	}
 }

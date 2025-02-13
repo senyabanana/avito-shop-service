@@ -20,7 +20,7 @@ func (h *Handler) sendCoin(c *gin.Context) {
 		return
 	}
 
-	if err := h.services.Transaction.SendCoin(userID, input.ToUser, input.Amount); err != nil {
+	if err := h.services.Transaction.SendCoin(c.Request.Context(), userID, input.ToUser, input.Amount); err != nil {
 		entity.NewErrorResponse(c, h.log, http.StatusBadRequest, err.Error())
 		return
 	}
