@@ -10,6 +10,8 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+//go:generate mockgen -source=service.go -destination=mocks/mock.go
+
 type Authorization interface {
 	GetUser(ctx context.Context, username string) (entity.User, error)
 	CreateUser(ctx context.Context, username, password string) error
