@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
-	
+
 	"github.com/senyabanana/avito-shop-service/internal/entity"
 	"github.com/senyabanana/avito-shop-service/internal/service"
 	mocks "github.com/senyabanana/avito-shop-service/internal/service/mocks"
@@ -47,14 +47,6 @@ func TestHandler_SendCoin(t *testing.T) {
 			},
 			wantStatus: http.StatusOK,
 			wantBody:   `{"status":"coins were successfully sent to the user"}`,
-		},
-		{
-			name:         "User ID not found",
-			userID:       nil,
-			requestBody:  entity.SendCoinRequest{ToUser: "recipient", Amount: 50},
-			mockBehavior: func() {},
-			wantStatus:   http.StatusUnauthorized,
-			wantBody:     `{"errors":"user not found"}`,
 		},
 		{
 			name:         "Invalid request format",

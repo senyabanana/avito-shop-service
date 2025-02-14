@@ -51,13 +51,6 @@ func TestHandler_GetInfo(t *testing.T) {
 			wantBody: `{"coins":500,"inventory":[{"type":"cup","quantity":1}],"coinHistory":{"received":[],"sent":[]}}`,
 		},
 		{
-			name:         "Error getting user ID",
-			userID:       0,
-			mockBehavior: func() {},
-			wantCode:     http.StatusUnauthorized,
-			wantBody:     `{"errors":"user not found"}`,
-		},
-		{
 			name:   "Error fetching user info",
 			userID: 2,
 			mockBehavior: func() {

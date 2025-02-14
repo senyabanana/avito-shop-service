@@ -11,7 +11,6 @@ import (
 func (h *Handler) buyItem(c *gin.Context) {
 	userID, err := h.getUserID(c)
 	if err != nil {
-		entity.NewErrorResponse(c, h.log, http.StatusUnauthorized, err.Error())
 		return
 	}
 

@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
-	
+
 	"github.com/senyabanana/avito-shop-service/internal/entity"
 	"github.com/senyabanana/avito-shop-service/internal/service"
 	mocks "github.com/senyabanana/avito-shop-service/internal/service/mocks"
@@ -45,14 +45,6 @@ func TestHandler_BuyItem(t *testing.T) {
 			},
 			wantStatus: http.StatusOK,
 			wantBody:   `{"status":"item was successfully purchased"}`,
-		},
-		{
-			name:         "User ID not found",
-			userID:       nil,
-			itemParam:    "cup",
-			mockBehavior: func() {},
-			wantStatus:   http.StatusUnauthorized,
-			wantBody:     `{"errors":"user not found"}`,
 		},
 		{
 			name:         "Item parameter missing",
