@@ -79,7 +79,7 @@ func TestHandler_GetInfo(t *testing.T) {
 			c.Request = req
 
 			if tt.userID > 0 {
-				c.Set("userID", tt.userID)
+				c.Set(userCtx, tt.userID)
 			}
 
 			handler.getInfo(c)
