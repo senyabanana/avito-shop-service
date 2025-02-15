@@ -8,14 +8,14 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/senyabanana/avito-shop-service/internal/entity"
-	"github.com/senyabanana/avito-shop-service/internal/service"
-	mocks "github.com/senyabanana/avito-shop-service/internal/service/mocks"
-
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/senyabanana/avito-shop-service/internal/entity"
+	"github.com/senyabanana/avito-shop-service/internal/service"
+	mocks "github.com/senyabanana/avito-shop-service/internal/service/mocks"
 )
 
 func TestHandler_Authenticate(t *testing.T) {
@@ -79,6 +79,7 @@ func TestHandler_Authenticate(t *testing.T) {
 			mockBehavior: func() {
 				mockAuthService.EXPECT().GetUser(gomock.Any(), "failuser").Return(entity.User{}, errors.New("user not found"))
 				mockAuthService.EXPECT().CreateUser(gomock.Any(), "failuser", "failpass").Return(errors.New("creation failed"))
+				mockAuthService.EXPECT().GenerateToken(gomock.Any(), gomock.Any(), gomock.Any()).Times(0)
 			},
 			wantCode: http.StatusBadRequest,
 			wantBody: `{"errors":"creation failed"}`,

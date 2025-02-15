@@ -5,9 +5,6 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/senyabanana/avito-shop-service/internal/entity"
-	mocks "github.com/senyabanana/avito-shop-service/internal/repository/mocks"
-
 	"github.com/DATA-DOG/go-sqlmock"
 	trmsqlx "github.com/avito-tech/go-transaction-manager/drivers/sqlx/v2"
 	"github.com/avito-tech/go-transaction-manager/trm/v2/manager"
@@ -15,6 +12,9 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/senyabanana/avito-shop-service/internal/entity"
+	mocks "github.com/senyabanana/avito-shop-service/internal/repository/mocks"
 )
 
 func TestInventoryService_BuyItem(t *testing.T) {

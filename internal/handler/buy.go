@@ -3,9 +3,9 @@ package handler
 import (
 	"net/http"
 
-	"github.com/senyabanana/avito-shop-service/internal/entity"
-
 	"github.com/gin-gonic/gin"
+
+	"github.com/senyabanana/avito-shop-service/internal/entity"
 )
 
 func (h *Handler) buyItem(c *gin.Context) {

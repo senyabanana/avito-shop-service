@@ -3,11 +3,11 @@ package service
 import (
 	"context"
 
-	"github.com/senyabanana/avito-shop-service/internal/entity"
-	"github.com/senyabanana/avito-shop-service/internal/repository"
-
 	"github.com/avito-tech/go-transaction-manager/trm/v2/manager"
 	"github.com/sirupsen/logrus"
+
+	"github.com/senyabanana/avito-shop-service/internal/entity"
+	"github.com/senyabanana/avito-shop-service/internal/repository"
 )
 
 type InventoryService struct {

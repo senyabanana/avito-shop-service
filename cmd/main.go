@@ -8,16 +8,16 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/avito-tech/go-transaction-manager/trm/v2/manager"
-	"github.com/senyabanana/avito-shop-service/internal/config"
-	"github.com/senyabanana/avito-shop-service/internal/database"
-	"github.com/senyabanana/avito-shop-service/internal/handler"
-	"github.com/senyabanana/avito-shop-service/internal/logger"
-	"github.com/senyabanana/avito-shop-service/internal/repository"
-	"github.com/senyabanana/avito-shop-service/internal/server"
-	"github.com/senyabanana/avito-shop-service/internal/service"
-
 	trmsqlx "github.com/avito-tech/go-transaction-manager/drivers/sqlx/v2"
+	"github.com/avito-tech/go-transaction-manager/trm/v2/manager"
+
+	"github.com/senyabanana/avito-shop-service/internal/config"
+	"github.com/senyabanana/avito-shop-service/internal/handler"
+	"github.com/senyabanana/avito-shop-service/internal/infrastructure/database"
+	"github.com/senyabanana/avito-shop-service/internal/infrastructure/logger"
+	"github.com/senyabanana/avito-shop-service/internal/infrastructure/server"
+	"github.com/senyabanana/avito-shop-service/internal/repository"
+	"github.com/senyabanana/avito-shop-service/internal/service"
 )
 
 func main() {

@@ -3,10 +3,10 @@ package repository
 import (
 	"context"
 
-	"github.com/senyabanana/avito-shop-service/internal/entity"
-
 	trmsqlx "github.com/avito-tech/go-transaction-manager/drivers/sqlx/v2"
 	"github.com/jmoiron/sqlx"
+
+	"github.com/senyabanana/avito-shop-service/internal/entity"
 )
 
 type UserPostgres struct {

@@ -6,14 +6,14 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/senyabanana/avito-shop-service/internal/entity"
-	"github.com/senyabanana/avito-shop-service/internal/service"
-	mocks "github.com/senyabanana/avito-shop-service/internal/service/mocks"
-
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/senyabanana/avito-shop-service/internal/entity"
+	"github.com/senyabanana/avito-shop-service/internal/service"
+	mocks "github.com/senyabanana/avito-shop-service/internal/service/mocks"
 )
 
 func TestHandler_BuyItem(t *testing.T) {

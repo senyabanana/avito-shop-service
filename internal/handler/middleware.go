@@ -4,9 +4,9 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/senyabanana/avito-shop-service/internal/entity"
-
 	"github.com/gin-gonic/gin"
+
+	"github.com/senyabanana/avito-shop-service/internal/entity"
 )
 
 const (

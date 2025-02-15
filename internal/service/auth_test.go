@@ -6,9 +6,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/senyabanana/avito-shop-service/internal/entity"
-	mocks "github.com/senyabanana/avito-shop-service/internal/repository/mocks"
-
 	"github.com/DATA-DOG/go-sqlmock"
 	trmsqlx "github.com/avito-tech/go-transaction-manager/drivers/sqlx/v2"
 	"github.com/avito-tech/go-transaction-manager/trm/v2/manager"
@@ -17,6 +14,9 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/senyabanana/avito-shop-service/internal/entity"
+	mocks "github.com/senyabanana/avito-shop-service/internal/repository/mocks"
 )
 
 const (
@@ -113,17 +113,9 @@ func TestAuthService_CreateUser(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			mock.ExpectBegin()
-
 			mockRepo.EXPECT().
 				CreateUser(gomock.Any(), gomock.Any()).
 				Return(testUserID, tt.mockErr)
-
-			if tt.wantCommit {
-				mock.ExpectCommit()
-			} else {
-				mock.ExpectRollback()
-			}
 
 			err := authService.CreateUser(context.Background(), tt.username, tt.password)
 

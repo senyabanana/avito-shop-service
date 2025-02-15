@@ -6,12 +6,12 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/senyabanana/avito-shop-service/internal/entity"
-	"github.com/senyabanana/avito-shop-service/internal/repository"
-
 	"github.com/avito-tech/go-transaction-manager/trm/v2/manager"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/sirupsen/logrus"
+
+	"github.com/senyabanana/avito-shop-service/internal/entity"
+	"github.com/senyabanana/avito-shop-service/internal/repository"
 )
 
 const (

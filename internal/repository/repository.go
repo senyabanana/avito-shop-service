@@ -3,9 +3,9 @@ package repository
 import (
 	"context"
 
-	"github.com/senyabanana/avito-shop-service/internal/entity"
-
 	"github.com/jmoiron/sqlx"
+
+	"github.com/senyabanana/avito-shop-service/internal/entity"
 )
 
 //go:generate mockgen -source=repository.go -destination=mocks/mock.go

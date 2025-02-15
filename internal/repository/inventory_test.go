@@ -5,11 +5,11 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/senyabanana/avito-shop-service/internal/entity"
-
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/jmoiron/sqlx"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/senyabanana/avito-shop-service/internal/entity"
 )
 
 func TestInventoryPostgres_GetItem(t *testing.T) {

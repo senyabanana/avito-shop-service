@@ -1,10 +1,10 @@
 package handler
 
 import (
-	"github.com/senyabanana/avito-shop-service/internal/service"
-
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
+
+	"github.com/senyabanana/avito-shop-service/internal/service"
 )
 
 type Handler struct {
