@@ -9,15 +9,14 @@ CREATE TABLE IF NOT EXISTS users
 CREATE TABLE IF NOT EXISTS transactions
 (
     id BIGSERIAL PRIMARY KEY,
-    from_user BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    to_user BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    from_user BIGINT NOT NULL REFERENCES users(id),
+    to_user BIGINT NOT NULL REFERENCES users(id),
     amount BIGINT NOT NULL CHECK (amount > 0),
-    created_at TIMESTAMP DEFAULT NOW()
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE INDEX IF NOT EXISTS idx_transactions_from_user ON transactions(from_user);
 CREATE INDEX IF NOT EXISTS idx_transactions_to_user ON transactions(to_user);
-CREATE INDEX IF NOT EXISTS idx_transactions_created_at ON transactions(created_at);
 
 CREATE TABLE IF NOT EXISTS merch_items
 (
@@ -26,17 +25,14 @@ CREATE TABLE IF NOT EXISTS merch_items
     price INT NOT NULL CHECK (price > 0)
 );
 
-CREATE INDEX IF NOT EXISTS idx_merch_items_type ON merch_items(item_type);
-
 CREATE TABLE IF NOT EXISTS inventory
 (
     id BIGSERIAL PRIMARY KEY,
-    user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    merch_id BIGINT NOT NULL REFERENCES merch_items(id) ON DELETE CASCADE,
+    user_id BIGINT NOT NULL REFERENCES users(id),
+    merch_id BIGINT NOT NULL REFERENCES merch_items(id),
     quantity INT NOT NULL DEFAULT 0
 );
 
-CREATE INDEX IF NOT EXISTS idx_inventory_user ON inventory(user_id);
 CREATE INDEX IF NOT EXISTS idx_inventory_user_merch ON inventory(user_id, merch_id);
 
 INSERT INTO merch_items (item_type, price) VALUES

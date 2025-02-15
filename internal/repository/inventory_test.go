@@ -92,7 +92,7 @@ func TestInventoryPostgres_GetUserInventory(t *testing.T) {
 					AddRow("cup", int64(1))
 
 				mock.ExpectQuery(`
-						SELECT mi.item_type AS type, COALESCE\(SUM\(i.quantity\), 0\) AS quantity
+						SELECT mi.item_type AS type, SUM\(i.quantity\) AS quantity
 						FROM inventory AS i
 						JOIN merch_items AS mi ON i.merch_id = mi.id
 						WHERE i.user_id = \$1 GROUP BY mi.item_type`).
@@ -110,7 +110,7 @@ func TestInventoryPostgres_GetUserInventory(t *testing.T) {
 			userID: 1,
 			mockBehavior: func() {
 				mock.ExpectQuery(`
-						SELECT mi.item_type AS type, COALESCE\(SUM\(i.quantity\), 0\) AS quantity
+						SELECT mi.item_type AS type, SUM\(i.quantity\) AS quantity
 						FROM inventory AS i
 						JOIN merch_items AS mi ON i.merch_id = mi.id
 						WHERE i.user_id = \$1 GROUP BY mi.item_type`).

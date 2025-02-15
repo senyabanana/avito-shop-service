@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/senyabanana/avito-shop-service/internal/entity"
@@ -17,7 +18,7 @@ func (h *Handler) authenticate(c *gin.Context) {
 	}
 
 	_, err := h.services.Authorization.GetUser(c.Request.Context(), input.Username)
-	if err != nil {
+	if err != nil && errors.Is(err, entity.ErrUserNotFound) {
 		if err := h.services.Authorization.CreateUser(c.Request.Context(), input.Username, input.Password); err != nil {
 			entity.NewErrorResponse(c, h.log, http.StatusBadRequest, err.Error())
 			return

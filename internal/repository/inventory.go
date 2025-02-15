@@ -31,7 +31,7 @@ func (r *InventoryPostgres) GetItem(ctx context.Context, itemName string) (entit
 func (r *InventoryPostgres) GetUserInventory(ctx context.Context, userID int64) ([]entity.InventoryItem, error) {
 	var inventory []entity.InventoryItem
 	query := `
-		SELECT mi.item_type AS type, COALESCE(SUM(i.quantity), 0) AS quantity
+		SELECT mi.item_type AS type, SUM(i.quantity) AS quantity
 		FROM inventory AS i
 		JOIN merch_items AS mi ON i.merch_id = mi.id
 		WHERE i.user_id = $1

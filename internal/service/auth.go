@@ -59,16 +59,14 @@ func (s *AuthService) CreateUser(ctx context.Context, username, password string)
 		Coins:    1000,
 	}
 
-	return s.trManager.Do(ctx, func(ctx context.Context) error {
-		_, err := s.userRepo.CreateUser(ctx, newUser)
-		if err != nil {
-			s.log.Errorf("Failed to create user %s: %v", username, err)
-			return err
-		}
+	_, err := s.userRepo.CreateUser(ctx, newUser)
+	if err != nil {
+		s.log.Errorf("Failed to create user %s: %v", username, err)
+		return err
+	}
 
-		s.log.Infof("User %s created successfully", username)
-		return nil
-	})
+	s.log.Infof("User %s created successfully", username)
+	return nil
 }
 
 func (s *AuthService) GenerateToken(ctx context.Context, username, password string) (string, error) {
