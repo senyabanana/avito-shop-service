@@ -86,7 +86,6 @@ func TestE2E_SendCoins(t *testing.T) {
 	})
 }
 
-// Helper function to check user balance
 func checkBalance(t *testing.T, token string, expectedBalance int) {
 	req, _ := http.NewRequest("GET", sendCoinBaseURL+"/info", nil)
 	req.Header.Set("Authorization", "Bearer "+token)
@@ -103,7 +102,6 @@ func checkBalance(t *testing.T, token string, expectedBalance int) {
 	assert.Equal(t, float64(expectedBalance), info["coins"])
 }
 
-// Helper function to check transaction history
 func checkTransactionHistory(t *testing.T, token, transactionType string, expectedAmount int) {
 	req, _ := http.NewRequest("GET", sendCoinBaseURL+"/info", nil)
 	req.Header.Set("Authorization", "Bearer "+token)

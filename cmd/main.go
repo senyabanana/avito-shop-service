@@ -4,9 +4,9 @@ import (
 	"context"
 	"errors"
 	"net/http"
-	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/avito-tech/go-transaction-manager/trm/v2/manager"
 	"github.com/senyabanana/avito-shop-service/internal/config"
@@ -21,7 +21,10 @@ import (
 )
 
 func main() {
-	ctx := context.Background()
+	// Основной контекст, управляемый сигналами
+	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGTERM, syscall.SIGINT)
+	defer cancel()
+
 	log := logger.NewLogger()
 
 	cfg, err := config.LoadConfig(".")
@@ -33,6 +36,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("failed to initialize db: %s", err.Error())
 	}
+	defer db.Close()
 
 	trManager := manager.Must(trmsqlx.NewDefaultFactory(db))
 	repos := repository.NewRepository(db)
@@ -40,29 +44,25 @@ func main() {
 	handlers := handler.NewHandler(services, log)
 
 	srv := new(server.Server)
-	ctx, cancel := context.WithCancel(ctx)
 
 	go func() {
-		if err := srv.Run(cfg.ServerPort, handlers.InitRoutes()); err != nil && !errors.Is(err, http.ErrServerClosed) {
-			log.Fatalf("error occured while running http server: %s", err.Error())
+		if err := srv.Run(ctx, cfg.ServerPort, handlers.InitRoutes()); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			log.Fatalf("error occurred while running http server: %s", err.Error())
 		}
 	}()
 
 	log.Info("Server started on port ", cfg.ServerPort)
 
-	quit := make(chan os.Signal, 1)
-	signal.Notify(quit, syscall.SIGTERM, syscall.SIGINT)
-	<-quit
+	<-ctx.Done()
 
 	log.Info("Server shutting down...")
-	cancel()
 
-	if err := srv.Shutdown(context.Background()); err != nil {
-		log.Errorf("error occured on server shutting down: %s", err.Error())
-	}
+	// Завершаем сервер с таймаутом
+	shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer shutdownCancel()
 
-	if err := db.Close(); err != nil {
-		log.Errorf("error occured on db connection close: %s", err.Error())
+	if err := srv.Shutdown(shutdownCtx); err != nil {
+		log.Errorf("error occurred on server shutdown: %s", err.Error())
 	}
 
 	log.Info("Server stopped gracefully")

@@ -95,7 +95,7 @@ func TestE2E_InsufficientFunds(t *testing.T) {
 		json.NewDecoder(resp.Body).Decode(&info)
 		resp.Body.Close()
 
-		assert.Equal(t, float64(0), info["coins"]) // Баланс должен быть 0 или близким к 0
-		assert.NotEmpty(t, info["inventory"])      // У пользователя должен быть инвентарь
+		assert.Equal(t, float64(0), info["coins"])
+		assert.NotEmpty(t, info["inventory"])
 	})
 }

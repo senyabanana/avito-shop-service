@@ -21,11 +21,11 @@ func TestTransactionPostgres_GetReceivedTransactions(t *testing.T) {
 	repo := NewTransactionPostgres(sqlxDB)
 
 	tests := []struct {
-		name          string
-		userID        int
-		mockBehavior  func()
-		expectedError error
-		expectedData  []entity.TransactionDetail
+		name         string
+		userID       int
+		mockBehavior func()
+		wantError    error
+		wantData     []entity.TransactionDetail
 	}{
 		{
 			name:   "Success",
@@ -41,8 +41,8 @@ func TestTransactionPostgres_GetReceivedTransactions(t *testing.T) {
 					WithArgs(1).
 					WillReturnRows(rows)
 			},
-			expectedError: nil,
-			expectedData: []entity.TransactionDetail{
+			wantError: nil,
+			wantData: []entity.TransactionDetail{
 				{FromUser: "user1", Amount: 100},
 				{FromUser: "user2", Amount: 50},
 			},
@@ -57,8 +57,8 @@ func TestTransactionPostgres_GetReceivedTransactions(t *testing.T) {
 					WithArgs(1).
 					WillReturnError(errors.New("query error"))
 			},
-			expectedError: errors.New("query error"),
-			expectedData:  nil,
+			wantError: errors.New("query error"),
+			wantData:  nil,
 		},
 	}
 
@@ -69,8 +69,8 @@ func TestTransactionPostgres_GetReceivedTransactions(t *testing.T) {
 			ctx := context.Background()
 			data, err := repo.GetReceivedTransactions(ctx, tt.userID)
 
-			assert.Equal(t, tt.expectedError, err)
-			assert.Equal(t, tt.expectedData, data)
+			assert.Equal(t, tt.wantError, err)
+			assert.Equal(t, tt.wantData, data)
 			assert.NoError(t, mock.ExpectationsWereMet())
 		})
 	}
@@ -85,11 +85,11 @@ func TestTransactionPostgres_GetSentTransactions(t *testing.T) {
 	repo := NewTransactionPostgres(sqlxDB)
 
 	tests := []struct {
-		name          string
-		userID        int
-		mockBehavior  func()
-		expectedError error
-		expectedData  []entity.TransactionDetail
+		name         string
+		userID       int
+		mockBehavior func()
+		wantError    error
+		wantData     []entity.TransactionDetail
 	}{
 		{
 			name:   "Success",
@@ -105,8 +105,8 @@ func TestTransactionPostgres_GetSentTransactions(t *testing.T) {
 					WithArgs(1).
 					WillReturnRows(rows)
 			},
-			expectedError: nil,
-			expectedData: []entity.TransactionDetail{
+			wantError: nil,
+			wantData: []entity.TransactionDetail{
 				{ToUser: "user2", Amount: 100},
 				{ToUser: "user3", Amount: 200},
 			},
@@ -121,8 +121,8 @@ func TestTransactionPostgres_GetSentTransactions(t *testing.T) {
 					WithArgs(1).
 					WillReturnError(errors.New("query error"))
 			},
-			expectedError: errors.New("query error"),
-			expectedData:  nil,
+			wantError: errors.New("query error"),
+			wantData:  nil,
 		},
 	}
 
@@ -133,8 +133,8 @@ func TestTransactionPostgres_GetSentTransactions(t *testing.T) {
 			ctx := context.Background()
 			data, err := repo.GetSentTransactions(ctx, tt.userID)
 
-			assert.Equal(t, tt.expectedError, err)
-			assert.Equal(t, tt.expectedData, data)
+			assert.Equal(t, tt.wantError, err)
+			assert.Equal(t, tt.wantData, data)
 			assert.NoError(t, mock.ExpectationsWereMet())
 		})
 	}
@@ -149,12 +149,12 @@ func TestTransactionPostgres_InsertTransaction(t *testing.T) {
 	repo := NewTransactionPostgres(sqlxDB)
 
 	tests := []struct {
-		name          string
-		fromUserID    int
-		toUserID      int
-		amount        int
-		mockBehavior  func()
-		expectedError error
+		name         string
+		fromUserID   int
+		toUserID     int
+		amount       int
+		mockBehavior func()
+		wantError    error
 	}{
 		{
 			name:       "Success",
@@ -166,7 +166,7 @@ func TestTransactionPostgres_InsertTransaction(t *testing.T) {
 					WithArgs(1, 2, 100).
 					WillReturnResult(sqlmock.NewResult(1, 1))
 			},
-			expectedError: nil,
+			wantError: nil,
 		},
 		{
 			name:       "Query Error",
@@ -178,7 +178,7 @@ func TestTransactionPostgres_InsertTransaction(t *testing.T) {
 					WithArgs(1, 2, 100).
 					WillReturnError(errors.New("insert error"))
 			},
-			expectedError: errors.New("insert error"),
+			wantError: errors.New("insert error"),
 		},
 	}
 
@@ -189,7 +189,7 @@ func TestTransactionPostgres_InsertTransaction(t *testing.T) {
 			ctx := context.Background()
 			err := repo.InsertTransaction(ctx, tt.fromUserID, tt.toUserID, tt.amount)
 
-			assert.Equal(t, tt.expectedError, err)
+			assert.Equal(t, tt.wantError, err)
 			assert.NoError(t, mock.ExpectationsWereMet())
 		})
 	}
