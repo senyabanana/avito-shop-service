@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
-	
+
 	"github.com/senyabanana/avito-shop-service/internal/entity"
 	"github.com/senyabanana/avito-shop-service/internal/service"
 	mocks "github.com/senyabanana/avito-shop-service/internal/service/mocks"
@@ -38,7 +38,7 @@ func TestHandler_UserIdentity(t *testing.T) {
 			name:       "Success",
 			authHeader: "Bearer valid_token",
 			mockBehavior: func() {
-				mockAuthService.EXPECT().ParseToken("valid_token").Return(1, nil)
+				mockAuthService.EXPECT().ParseToken("valid_token").Return(int64(1), nil)
 			},
 			wantStatus: http.StatusOK,
 			wantBody:   ``,
@@ -61,7 +61,7 @@ func TestHandler_UserIdentity(t *testing.T) {
 			name:       "Invalid token",
 			authHeader: "Bearer invalid_token",
 			mockBehavior: func() {
-				mockAuthService.EXPECT().ParseToken("invalid_token").Return(0, errors.New("invalid or expired token"))
+				mockAuthService.EXPECT().ParseToken("invalid_token").Return(int64(0), errors.New("invalid or expired token"))
 			},
 			wantStatus: http.StatusUnauthorized,
 			wantBody:   `{"errors":"invalid or expired token"}`,
@@ -97,12 +97,12 @@ func TestHandler_GetUserID(t *testing.T) {
 	tests := []struct {
 		name        string
 		userContext interface{}
-		wantUserID  int
+		wantUserID  int64
 		wantErr     error
 	}{
 		{
 			name:        "Success",
-			userContext: 1,
+			userContext: int64(1),
 			wantUserID:  1,
 			wantErr:     nil,
 		},

@@ -22,7 +22,7 @@ func TestTransactionPostgres_GetReceivedTransactions(t *testing.T) {
 
 	tests := []struct {
 		name         string
-		userID       int
+		userID       int64
 		mockBehavior func()
 		wantError    error
 		wantData     []entity.TransactionDetail
@@ -32,13 +32,13 @@ func TestTransactionPostgres_GetReceivedTransactions(t *testing.T) {
 			userID: 1,
 			mockBehavior: func() {
 				rows := sqlmock.NewRows([]string{"from_user", "amount"}).
-					AddRow("user1", 100).
-					AddRow("user2", 50)
+					AddRow("user1", int64(100)).
+					AddRow("user2", int64(50))
 
 				mock.ExpectQuery(`
 						SELECT u.username AS from_user, t.amount FROM transactions AS t
 						JOIN users AS u ON t.from_user = u.id WHERE t.to_user = \$1`).
-					WithArgs(1).
+					WithArgs(int64(1)).
 					WillReturnRows(rows)
 			},
 			wantError: nil,
@@ -54,7 +54,7 @@ func TestTransactionPostgres_GetReceivedTransactions(t *testing.T) {
 				mock.ExpectQuery(`
 						SELECT u.username AS from_user, t.amount FROM transactions AS t
 						JOIN users AS u ON t.from_user = u.id WHERE t.to_user = \$1`).
-					WithArgs(1).
+					WithArgs(int64(1)).
 					WillReturnError(errors.New("query error"))
 			},
 			wantError: errors.New("query error"),
@@ -86,7 +86,7 @@ func TestTransactionPostgres_GetSentTransactions(t *testing.T) {
 
 	tests := []struct {
 		name         string
-		userID       int
+		userID       int64
 		mockBehavior func()
 		wantError    error
 		wantData     []entity.TransactionDetail
@@ -96,13 +96,13 @@ func TestTransactionPostgres_GetSentTransactions(t *testing.T) {
 			userID: 1,
 			mockBehavior: func() {
 				rows := sqlmock.NewRows([]string{"to_user", "amount"}).
-					AddRow("user2", 100).
-					AddRow("user3", 200)
+					AddRow("user2", int64(100)).
+					AddRow("user3", int64(200))
 
 				mock.ExpectQuery(`
 						SELECT u.username AS to_user, t.amount FROM transactions AS t
 						JOIN users AS u ON t.to_user = u.id WHERE t.from_user = \$1`).
-					WithArgs(1).
+					WithArgs(int64(1)).
 					WillReturnRows(rows)
 			},
 			wantError: nil,
@@ -118,7 +118,7 @@ func TestTransactionPostgres_GetSentTransactions(t *testing.T) {
 				mock.ExpectQuery(`
 						SELECT u.username AS to_user, t.amount FROM transactions AS t
 						JOIN users AS u ON t.to_user = u.id WHERE t.from_user = \$1`).
-					WithArgs(1).
+					WithArgs(int64(1)).
 					WillReturnError(errors.New("query error"))
 			},
 			wantError: errors.New("query error"),
@@ -150,9 +150,9 @@ func TestTransactionPostgres_InsertTransaction(t *testing.T) {
 
 	tests := []struct {
 		name         string
-		fromUserID   int
-		toUserID     int
-		amount       int
+		fromUserID   int64
+		toUserID     int64
+		amount       int64
 		mockBehavior func()
 		wantError    error
 	}{
@@ -163,7 +163,7 @@ func TestTransactionPostgres_InsertTransaction(t *testing.T) {
 			amount:     100,
 			mockBehavior: func() {
 				mock.ExpectExec(`INSERT INTO transactions \(from_user, to_user, amount\) VALUES \(\$1, \$2, \$3\)`).
-					WithArgs(1, 2, 100).
+					WithArgs(int64(1), int64(2), int64(100)).
 					WillReturnResult(sqlmock.NewResult(1, 1))
 			},
 			wantError: nil,
@@ -175,7 +175,7 @@ func TestTransactionPostgres_InsertTransaction(t *testing.T) {
 			amount:     100,
 			mockBehavior: func() {
 				mock.ExpectExec(`INSERT INTO transactions \(from_user, to_user, amount\) VALUES \(\$1, \$2, \$3\)`).
-					WithArgs(1, 2, 100).
+					WithArgs(int64(1), int64(2), int64(100)).
 					WillReturnError(errors.New("insert error"))
 			},
 			wantError: errors.New("insert error"),

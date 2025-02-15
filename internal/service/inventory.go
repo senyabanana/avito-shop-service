@@ -30,7 +30,7 @@ func NewInventoryService(
 	}
 }
 
-func (s *InventoryService) BuyItem(ctx context.Context, userID int, itemName string) error {
+func (s *InventoryService) BuyItem(ctx context.Context, userID int64, itemName string) error {
 	s.log.Infof("User %d is attempting to buy item: %s", userID, itemName)
 
 	return s.trManager.Do(ctx, func(ctx context.Context) error {

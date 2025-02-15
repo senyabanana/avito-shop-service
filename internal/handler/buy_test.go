@@ -28,7 +28,7 @@ func TestHandler_BuyItem(t *testing.T) {
 
 	tests := []struct {
 		name         string
-		userID       any
+		userID       int64
 		itemParam    string
 		mockBehavior func()
 		wantStatus   int
@@ -40,7 +40,7 @@ func TestHandler_BuyItem(t *testing.T) {
 			itemParam: "cup",
 			mockBehavior: func() {
 				mockInventoryService.EXPECT().
-					BuyItem(gomock.Any(), 1, "cup").
+					BuyItem(gomock.Any(), int64(1), "cup").
 					Return(nil)
 			},
 			wantStatus: http.StatusOK,
@@ -60,7 +60,7 @@ func TestHandler_BuyItem(t *testing.T) {
 			itemParam: "UnknownItem",
 			mockBehavior: func() {
 				mockInventoryService.EXPECT().
-					BuyItem(gomock.Any(), 1, "UnknownItem").
+					BuyItem(gomock.Any(), int64(1), "UnknownItem").
 					Return(entity.ErrItemNotFound)
 			},
 			wantStatus: http.StatusBadRequest,
@@ -72,7 +72,7 @@ func TestHandler_BuyItem(t *testing.T) {
 			itemParam: "cup",
 			mockBehavior: func() {
 				mockInventoryService.EXPECT().
-					BuyItem(gomock.Any(), 1, "cup").
+					BuyItem(gomock.Any(), int64(1), "cup").
 					Return(entity.ErrInsufficientBalance)
 			},
 			wantStatus: http.StatusBadRequest,
@@ -84,7 +84,7 @@ func TestHandler_BuyItem(t *testing.T) {
 			itemParam: "cup",
 			mockBehavior: func() {
 				mockInventoryService.EXPECT().
-					BuyItem(gomock.Any(), 1, "cup").
+					BuyItem(gomock.Any(), int64(1), "cup").
 					Return(errors.New("transaction failed"))
 			},
 			wantStatus: http.StatusBadRequest,
@@ -99,7 +99,7 @@ func TestHandler_BuyItem(t *testing.T) {
 			w := httptest.NewRecorder()
 			c, _ := gin.CreateTestContext(w)
 
-			if tt.userID != nil {
+			if tt.userID != int64(0) {
 				c.Set(userCtx, tt.userID)
 			}
 

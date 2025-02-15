@@ -1,16 +1,16 @@
 CREATE TABLE IF NOT EXISTS users
 (
-    id SERIAL PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     username VARCHAR(255) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
-    coins BIGINT NOT NULL DEFAULT 1000
+    coins BIGINT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS transactions
 (
-    id SERIAL PRIMARY KEY,
-    from_user INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    to_user INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    id BIGSERIAL PRIMARY KEY,
+    from_user BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    to_user BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     amount BIGINT NOT NULL CHECK (amount > 0),
     created_at TIMESTAMP DEFAULT NOW()
 );
@@ -21,7 +21,7 @@ CREATE INDEX IF NOT EXISTS idx_transactions_created_at ON transactions(created_a
 
 CREATE TABLE IF NOT EXISTS merch_items
 (
-    id SERIAL PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     item_type VARCHAR(255) NOT NULL UNIQUE,
     price INT NOT NULL CHECK (price > 0)
 );
@@ -30,9 +30,9 @@ CREATE INDEX IF NOT EXISTS idx_merch_items_type ON merch_items(item_type);
 
 CREATE TABLE IF NOT EXISTS inventory
 (
-    id SERIAL PRIMARY KEY,
-    user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    merch_id INT NOT NULL REFERENCES merch_items(id) ON DELETE CASCADE,
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    merch_id BIGINT NOT NULL REFERENCES merch_items(id) ON DELETE CASCADE,
     quantity INT NOT NULL DEFAULT 0
 );
 

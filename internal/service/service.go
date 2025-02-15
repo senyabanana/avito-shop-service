@@ -16,16 +16,16 @@ type Authorization interface {
 	GetUser(ctx context.Context, username string) (entity.User, error)
 	CreateUser(ctx context.Context, username, password string) error
 	GenerateToken(ctx context.Context, username, password string) (string, error)
-	ParseToken(accessToken string) (int, error)
+	ParseToken(accessToken string) (int64, error)
 }
 
 type Transaction interface {
-	GetUserInfo(ctx context.Context, userID int) (entity.InfoResponse, error)
-	SendCoin(ctx context.Context, fromUserID int, toUsername string, amount int) error
+	GetUserInfo(ctx context.Context, userID int64) (entity.InfoResponse, error)
+	SendCoin(ctx context.Context, fromUserID int64, toUsername string, amount int64) error
 }
 
 type Inventory interface {
-	BuyItem(ctx context.Context, userID int, itemName string) error
+	BuyItem(ctx context.Context, userID int64, itemName string) error
 }
 
 type Service struct {

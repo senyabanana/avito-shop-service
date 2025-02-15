@@ -36,10 +36,10 @@ func (m *MockUserRepository) EXPECT() *MockUserRepositoryMockRecorder {
 }
 
 // CreateUser mocks base method.
-func (m *MockUserRepository) CreateUser(ctx context.Context, user entity.User) (int, error) {
+func (m *MockUserRepository) CreateUser(ctx context.Context, user entity.User) (int64, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateUser", ctx, user)
-	ret0, _ := ret[0].(int)
+	ret0, _ := ret[0].(int64)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -66,10 +66,10 @@ func (mr *MockUserRepositoryMockRecorder) GetUser(ctx, username interface{}) *go
 }
 
 // GetUserBalance mocks base method.
-func (m *MockUserRepository) GetUserBalance(ctx context.Context, userID int) (int, error) {
+func (m *MockUserRepository) GetUserBalance(ctx context.Context, userID int64) (int64, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetUserBalance", ctx, userID)
-	ret0, _ := ret[0].(int)
+	ret0, _ := ret[0].(int64)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -81,7 +81,7 @@ func (mr *MockUserRepositoryMockRecorder) GetUserBalance(ctx, userID interface{}
 }
 
 // UpdateCoins mocks base method.
-func (m *MockUserRepository) UpdateCoins(ctx context.Context, userID, amount int) error {
+func (m *MockUserRepository) UpdateCoins(ctx context.Context, userID, amount int64) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateCoins", ctx, userID, amount)
 	ret0, _ := ret[0].(error)
@@ -118,7 +118,7 @@ func (m *MockTransactionRepository) EXPECT() *MockTransactionRepositoryMockRecor
 }
 
 // GetReceivedTransactions mocks base method.
-func (m *MockTransactionRepository) GetReceivedTransactions(ctx context.Context, userID int) ([]entity.TransactionDetail, error) {
+func (m *MockTransactionRepository) GetReceivedTransactions(ctx context.Context, userID int64) ([]entity.TransactionDetail, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetReceivedTransactions", ctx, userID)
 	ret0, _ := ret[0].([]entity.TransactionDetail)
@@ -133,7 +133,7 @@ func (mr *MockTransactionRepositoryMockRecorder) GetReceivedTransactions(ctx, us
 }
 
 // GetSentTransactions mocks base method.
-func (m *MockTransactionRepository) GetSentTransactions(ctx context.Context, userID int) ([]entity.TransactionDetail, error) {
+func (m *MockTransactionRepository) GetSentTransactions(ctx context.Context, userID int64) ([]entity.TransactionDetail, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetSentTransactions", ctx, userID)
 	ret0, _ := ret[0].([]entity.TransactionDetail)
@@ -148,7 +148,7 @@ func (mr *MockTransactionRepositoryMockRecorder) GetSentTransactions(ctx, userID
 }
 
 // InsertTransaction mocks base method.
-func (m *MockTransactionRepository) InsertTransaction(ctx context.Context, fromUserID, toUserID, amount int) error {
+func (m *MockTransactionRepository) InsertTransaction(ctx context.Context, fromUserID, toUserID, amount int64) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "InsertTransaction", ctx, fromUserID, toUserID, amount)
 	ret0, _ := ret[0].(error)
@@ -185,7 +185,7 @@ func (m *MockInventoryRepository) EXPECT() *MockInventoryRepositoryMockRecorder 
 }
 
 // GetInventoryItem mocks base method.
-func (m *MockInventoryRepository) GetInventoryItem(ctx context.Context, userID, merchID int) (int, error) {
+func (m *MockInventoryRepository) GetInventoryItem(ctx context.Context, userID, merchID int64) (int, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetInventoryItem", ctx, userID, merchID)
 	ret0, _ := ret[0].(int)
@@ -215,7 +215,7 @@ func (mr *MockInventoryRepositoryMockRecorder) GetItem(ctx, itemName interface{}
 }
 
 // GetUserInventory mocks base method.
-func (m *MockInventoryRepository) GetUserInventory(ctx context.Context, userID int) ([]entity.InventoryItem, error) {
+func (m *MockInventoryRepository) GetUserInventory(ctx context.Context, userID int64) ([]entity.InventoryItem, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetUserInventory", ctx, userID)
 	ret0, _ := ret[0].([]entity.InventoryItem)
@@ -230,7 +230,7 @@ func (mr *MockInventoryRepositoryMockRecorder) GetUserInventory(ctx, userID inte
 }
 
 // InsertInventoryItem mocks base method.
-func (m *MockInventoryRepository) InsertInventoryItem(ctx context.Context, userID, merchID int) error {
+func (m *MockInventoryRepository) InsertInventoryItem(ctx context.Context, userID, merchID int64) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "InsertInventoryItem", ctx, userID, merchID)
 	ret0, _ := ret[0].(error)
@@ -244,7 +244,7 @@ func (mr *MockInventoryRepositoryMockRecorder) InsertInventoryItem(ctx, userID, 
 }
 
 // UpdateInventoryItem mocks base method.
-func (m *MockInventoryRepository) UpdateInventoryItem(ctx context.Context, userID, merchID int) error {
+func (m *MockInventoryRepository) UpdateInventoryItem(ctx context.Context, userID, merchID int64) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateInventoryItem", ctx, userID, merchID)
 	ret0, _ := ret[0].(error)

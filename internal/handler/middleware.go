@@ -36,14 +36,14 @@ func (h *Handler) userIdentity(c *gin.Context) {
 	c.Set(userCtx, userID)
 }
 
-func (h *Handler) getUserID(c *gin.Context) (int, error) {
+func (h *Handler) getUserID(c *gin.Context) (int64, error) {
 	id, ok := c.Get(userCtx)
 	if !ok {
 		h.log.Warn("getUserID: user id not found in context")
 		return 0, entity.ErrUserNotFound
 	}
 
-	idInt, ok := id.(int)
+	idInt, ok := id.(int64)
 	if !ok {
 		h.log.Warn("getUserID: user id is of invalid type")
 		return 0, entity.ErrInvalidUserIDType

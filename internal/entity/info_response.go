@@ -1,7 +1,7 @@
 package entity
 
 type InfoResponse struct {
-	Coins       int             `json:"coins"`
+	Coins       int64           `json:"coins"`
 	Inventory   []InventoryItem `json:"inventory"`
 	CoinHistory CoinHistory     `json:"coinHistory"`
 }

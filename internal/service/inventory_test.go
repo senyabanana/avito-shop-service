@@ -32,7 +32,7 @@ func TestInventoryService_BuyItem(t *testing.T) {
 
 	tests := []struct {
 		name         string
-		userID       int
+		userID       int64
 		itemName     string
 		mockBehavior func()
 		wantErr      error
@@ -44,10 +44,10 @@ func TestInventoryService_BuyItem(t *testing.T) {
 			mockBehavior: func() {
 				mock.ExpectBegin()
 				mockInventoryRepo.EXPECT().GetItem(gomock.Any(), "cup").Return(entity.MerchItems{ID: 10, ItemType: "cup", Price: 50}, nil)
-				mockUserRepo.EXPECT().GetUserBalance(gomock.Any(), 1).Return(100, nil)
-				mockUserRepo.EXPECT().UpdateCoins(gomock.Any(), 1, -50).Return(nil)
-				mockInventoryRepo.EXPECT().GetInventoryItem(gomock.Any(), 1, 10).Return(1, nil)
-				mockInventoryRepo.EXPECT().UpdateInventoryItem(gomock.Any(), 1, 10).Return(nil)
+				mockUserRepo.EXPECT().GetUserBalance(gomock.Any(), int64(1)).Return(int64(100), nil)
+				mockUserRepo.EXPECT().UpdateCoins(gomock.Any(), int64(1), int64(-50)).Return(nil)
+				mockInventoryRepo.EXPECT().GetInventoryItem(gomock.Any(), int64(1), int64(10)).Return(1, nil)
+				mockInventoryRepo.EXPECT().UpdateInventoryItem(gomock.Any(), int64(1), int64(10)).Return(nil)
 				mock.ExpectCommit()
 			},
 			wantErr: nil,
@@ -70,7 +70,7 @@ func TestInventoryService_BuyItem(t *testing.T) {
 			mockBehavior: func() {
 				mock.ExpectBegin()
 				mockInventoryRepo.EXPECT().GetItem(gomock.Any(), "cup").Return(entity.MerchItems{ID: 10, ItemType: "cup", Price: 50}, nil)
-				mockUserRepo.EXPECT().GetUserBalance(gomock.Any(), 1).Return(0, errors.New("db error"))
+				mockUserRepo.EXPECT().GetUserBalance(gomock.Any(), int64(1)).Return(int64(0), errors.New("db error"))
 				mock.ExpectRollback()
 			},
 			wantErr: errors.New("db error"),
@@ -82,7 +82,7 @@ func TestInventoryService_BuyItem(t *testing.T) {
 			mockBehavior: func() {
 				mock.ExpectBegin()
 				mockInventoryRepo.EXPECT().GetItem(gomock.Any(), "cup").Return(entity.MerchItems{ID: 10, ItemType: "cup", Price: 100}, nil)
-				mockUserRepo.EXPECT().GetUserBalance(gomock.Any(), 1).Return(50, nil)
+				mockUserRepo.EXPECT().GetUserBalance(gomock.Any(), int64(1)).Return(int64(50), nil)
 				mock.ExpectRollback()
 			},
 			wantErr: entity.ErrInsufficientBalance,
@@ -94,8 +94,8 @@ func TestInventoryService_BuyItem(t *testing.T) {
 			mockBehavior: func() {
 				mock.ExpectBegin()
 				mockInventoryRepo.EXPECT().GetItem(gomock.Any(), "cup").Return(entity.MerchItems{ID: 10, ItemType: "cup", Price: 50}, nil)
-				mockUserRepo.EXPECT().GetUserBalance(gomock.Any(), 1).Return(100, nil)
-				mockUserRepo.EXPECT().UpdateCoins(gomock.Any(), 1, -50).Return(errors.New("db error"))
+				mockUserRepo.EXPECT().GetUserBalance(gomock.Any(), int64(1)).Return(int64(100), nil)
+				mockUserRepo.EXPECT().UpdateCoins(gomock.Any(), int64(1), int64(-50)).Return(errors.New("db error"))
 				mock.ExpectRollback()
 			},
 			wantErr: errors.New("db error"),
@@ -107,10 +107,10 @@ func TestInventoryService_BuyItem(t *testing.T) {
 			mockBehavior: func() {
 				mock.ExpectBegin()
 				mockInventoryRepo.EXPECT().GetItem(gomock.Any(), "cup").Return(entity.MerchItems{ID: 10, ItemType: "cup", Price: 50}, nil)
-				mockUserRepo.EXPECT().GetUserBalance(gomock.Any(), 1).Return(100, nil)
-				mockUserRepo.EXPECT().UpdateCoins(gomock.Any(), 1, -50).Return(nil)
-				mockInventoryRepo.EXPECT().GetInventoryItem(gomock.Any(), 1, 10).Return(1, nil)
-				mockInventoryRepo.EXPECT().UpdateInventoryItem(gomock.Any(), 1, 10).Return(errors.New("db error"))
+				mockUserRepo.EXPECT().GetUserBalance(gomock.Any(), int64(1)).Return(int64(100), nil)
+				mockUserRepo.EXPECT().UpdateCoins(gomock.Any(), int64(1), int64(-50)).Return(nil)
+				mockInventoryRepo.EXPECT().GetInventoryItem(gomock.Any(), int64(1), int64(10)).Return(1, nil)
+				mockInventoryRepo.EXPECT().UpdateInventoryItem(gomock.Any(), int64(1), int64(10)).Return(errors.New("db error"))
 				mock.ExpectRollback()
 			},
 			wantErr: errors.New("db error"),

@@ -28,7 +28,7 @@ func (r *InventoryPostgres) GetItem(ctx context.Context, itemName string) (entit
 	return item, r.getter.DefaultTrOrDB(ctx, r.db).GetContext(ctx, &item, query, itemName)
 }
 
-func (r *InventoryPostgres) GetUserInventory(ctx context.Context, userID int) ([]entity.InventoryItem, error) {
+func (r *InventoryPostgres) GetUserInventory(ctx context.Context, userID int64) ([]entity.InventoryItem, error) {
 	var inventory []entity.InventoryItem
 	query := `
 		SELECT mi.item_type AS type, COALESCE(SUM(i.quantity), 0) AS quantity
@@ -40,7 +40,7 @@ func (r *InventoryPostgres) GetUserInventory(ctx context.Context, userID int) ([
 	return inventory, r.getter.DefaultTrOrDB(ctx, r.db).SelectContext(ctx, &inventory, query, userID)
 }
 
-func (r *InventoryPostgres) GetInventoryItem(ctx context.Context, userID, merchID int) (int, error) {
+func (r *InventoryPostgres) GetInventoryItem(ctx context.Context, userID, merchID int64) (int, error) {
 	var quantity int
 	query := `SELECT quantity FROM inventory WHERE user_id = $1 AND merch_id = $2`
 	err := r.getter.DefaultTrOrDB(ctx, r.db).GetContext(ctx, &quantity, query, userID, merchID)
@@ -51,13 +51,13 @@ func (r *InventoryPostgres) GetInventoryItem(ctx context.Context, userID, merchI
 	return quantity, nil
 }
 
-func (r *InventoryPostgres) UpdateInventoryItem(ctx context.Context, userID, merchID int) error {
+func (r *InventoryPostgres) UpdateInventoryItem(ctx context.Context, userID, merchID int64) error {
 	query := `UPDATE inventory SET quantity = quantity + 1 WHERE user_id = $1 AND merch_id = $2`
 	_, err := r.getter.DefaultTrOrDB(ctx, r.db).ExecContext(ctx, query, userID, merchID)
 	return err
 }
 
-func (r *InventoryPostgres) InsertInventoryItem(ctx context.Context, userID, merchID int) error {
+func (r *InventoryPostgres) InsertInventoryItem(ctx context.Context, userID, merchID int64) error {
 	query := `INSERT INTO inventory (user_id, merch_id, quantity) VALUES ($1, $2, 1)`
 	_, err := r.getter.DefaultTrOrDB(ctx, r.db).ExecContext(ctx, query, userID, merchID)
 	return err

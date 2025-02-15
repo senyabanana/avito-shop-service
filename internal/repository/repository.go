@@ -11,24 +11,24 @@ import (
 //go:generate mockgen -source=repository.go -destination=mocks/mock.go
 
 type UserRepository interface {
-	CreateUser(ctx context.Context, user entity.User) (int, error)
+	CreateUser(ctx context.Context, user entity.User) (int64, error)
 	GetUser(ctx context.Context, username string) (entity.User, error)
-	GetUserBalance(ctx context.Context, userID int) (int, error)
-	UpdateCoins(ctx context.Context, userID, amount int) error
+	GetUserBalance(ctx context.Context, userID int64) (int64, error)
+	UpdateCoins(ctx context.Context, userID, amount int64) error
 }
 
 type TransactionRepository interface {
-	GetReceivedTransactions(ctx context.Context, userID int) ([]entity.TransactionDetail, error)
-	GetSentTransactions(ctx context.Context, userID int) ([]entity.TransactionDetail, error)
-	InsertTransaction(ctx context.Context, fromUserID, toUserID, amount int) error
+	GetReceivedTransactions(ctx context.Context, userID int64) ([]entity.TransactionDetail, error)
+	GetSentTransactions(ctx context.Context, userID int64) ([]entity.TransactionDetail, error)
+	InsertTransaction(ctx context.Context, fromUserID, toUserID, amount int64) error
 }
 
 type InventoryRepository interface {
 	GetItem(ctx context.Context, itemName string) (entity.MerchItems, error)
-	GetUserInventory(ctx context.Context, userID int) ([]entity.InventoryItem, error)
-	GetInventoryItem(ctx context.Context, userID, merchID int) (int, error)
-	UpdateInventoryItem(ctx context.Context, userID, merchID int) error
-	InsertInventoryItem(ctx context.Context, userID, merchID int) error
+	GetUserInventory(ctx context.Context, userID int64) ([]entity.InventoryItem, error)
+	GetInventoryItem(ctx context.Context, userID, merchID int64) (int, error)
+	UpdateInventoryItem(ctx context.Context, userID, merchID int64) error
+	InsertInventoryItem(ctx context.Context, userID, merchID int64) error
 }
 
 type Repository struct {

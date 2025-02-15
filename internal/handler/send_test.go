@@ -30,7 +30,7 @@ func TestHandler_SendCoin(t *testing.T) {
 
 	tests := []struct {
 		name         string
-		userID       interface{}
+		userID       int64
 		requestBody  entity.SendCoinRequest
 		mockBehavior func()
 		wantStatus   int
@@ -42,7 +42,7 @@ func TestHandler_SendCoin(t *testing.T) {
 			requestBody: entity.SendCoinRequest{ToUser: "recipient", Amount: 50},
 			mockBehavior: func() {
 				mockTransactionService.EXPECT().
-					SendCoin(gomock.Any(), 1, "recipient", 50).
+					SendCoin(gomock.Any(), int64(1), "recipient", int64(50)).
 					Return(nil)
 			},
 			wantStatus: http.StatusOK,
@@ -62,7 +62,7 @@ func TestHandler_SendCoin(t *testing.T) {
 			requestBody: entity.SendCoinRequest{ToUser: "unknown", Amount: 50},
 			mockBehavior: func() {
 				mockTransactionService.EXPECT().
-					SendCoin(gomock.Any(), 1, "unknown", 50).
+					SendCoin(gomock.Any(), int64(1), "unknown", int64(50)).
 					Return(entity.ErrRecipientNotFound)
 			},
 			wantStatus: http.StatusBadRequest,
@@ -74,7 +74,7 @@ func TestHandler_SendCoin(t *testing.T) {
 			requestBody: entity.SendCoinRequest{ToUser: "recipient", Amount: 1000},
 			mockBehavior: func() {
 				mockTransactionService.EXPECT().
-					SendCoin(gomock.Any(), 1, "recipient", 1000).
+					SendCoin(gomock.Any(), int64(1), "recipient", int64(1000)).
 					Return(entity.ErrInsufficientBalance)
 			},
 			wantStatus: http.StatusBadRequest,
@@ -86,7 +86,7 @@ func TestHandler_SendCoin(t *testing.T) {
 			requestBody: entity.SendCoinRequest{ToUser: "recipient", Amount: 50},
 			mockBehavior: func() {
 				mockTransactionService.EXPECT().
-					SendCoin(gomock.Any(), 1, "recipient", 50).
+					SendCoin(gomock.Any(), int64(1), "recipient", int64(50)).
 					Return(errors.New("transaction failed"))
 			},
 			wantStatus: http.StatusBadRequest,
@@ -101,7 +101,7 @@ func TestHandler_SendCoin(t *testing.T) {
 			w := httptest.NewRecorder()
 			c, _ := gin.CreateTestContext(w)
 
-			if tt.userID != nil {
+			if tt.userID != int64(0) {
 				c.Set(userCtx, tt.userID)
 			}
 

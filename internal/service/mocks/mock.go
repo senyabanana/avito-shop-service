@@ -80,10 +80,10 @@ func (mr *MockAuthorizationMockRecorder) GetUser(ctx, username interface{}) *gom
 }
 
 // ParseToken mocks base method.
-func (m *MockAuthorization) ParseToken(accessToken string) (int, error) {
+func (m *MockAuthorization) ParseToken(accessToken string) (int64, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ParseToken", accessToken)
-	ret0, _ := ret[0].(int)
+	ret0, _ := ret[0].(int64)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -118,7 +118,7 @@ func (m *MockTransaction) EXPECT() *MockTransactionMockRecorder {
 }
 
 // GetUserInfo mocks base method.
-func (m *MockTransaction) GetUserInfo(ctx context.Context, userID int) (entity.InfoResponse, error) {
+func (m *MockTransaction) GetUserInfo(ctx context.Context, userID int64) (entity.InfoResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetUserInfo", ctx, userID)
 	ret0, _ := ret[0].(entity.InfoResponse)
@@ -133,7 +133,7 @@ func (mr *MockTransactionMockRecorder) GetUserInfo(ctx, userID interface{}) *gom
 }
 
 // SendCoin mocks base method.
-func (m *MockTransaction) SendCoin(ctx context.Context, fromUserID int, toUsername string, amount int) error {
+func (m *MockTransaction) SendCoin(ctx context.Context, fromUserID int64, toUsername string, amount int64) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SendCoin", ctx, fromUserID, toUsername, amount)
 	ret0, _ := ret[0].(error)
@@ -170,7 +170,7 @@ func (m *MockInventory) EXPECT() *MockInventoryMockRecorder {
 }
 
 // BuyItem mocks base method.
-func (m *MockInventory) BuyItem(ctx context.Context, userID int, itemName string) error {
+func (m *MockInventory) BuyItem(ctx context.Context, userID int64, itemName string) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "BuyItem", ctx, userID, itemName)
 	ret0, _ := ret[0].(error)

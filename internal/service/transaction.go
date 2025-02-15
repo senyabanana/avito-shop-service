@@ -33,7 +33,7 @@ func NewTransactionService(
 	}
 }
 
-func (s *TransactionService) GetUserInfo(ctx context.Context, userID int) (entity.InfoResponse, error) {
+func (s *TransactionService) GetUserInfo(ctx context.Context, userID int64) (entity.InfoResponse, error) {
 	s.log.Infof("Fetching user info for userID: %d", userID)
 
 	var info entity.InfoResponse
@@ -86,7 +86,7 @@ func (s *TransactionService) GetUserInfo(ctx context.Context, userID int) (entit
 	return info, nil
 }
 
-func (s *TransactionService) SendCoin(ctx context.Context, fromUserID int, toUsername string, amount int) error {
+func (s *TransactionService) SendCoin(ctx context.Context, fromUserID int64, toUsername string, amount int64) error {
 	s.log.Infof("User %d is sending %d coins to %s", fromUserID, amount, toUsername)
 
 	return s.trManager.Do(ctx, func(ctx context.Context) error {

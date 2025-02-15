@@ -32,7 +32,7 @@ func TestInventoryPostgres_GetItem(t *testing.T) {
 			itemName: "t-shirt",
 			mockBehavior: func() {
 				rows := sqlmock.NewRows([]string{"id", "item_type", "price"}).
-					AddRow(1, "t-shirt", 80)
+					AddRow(int64(1), "t-shirt", int64(80))
 
 				mock.ExpectQuery(`SELECT id, item_type, price FROM merch_items WHERE item_type = \$1`).
 					WithArgs("t-shirt").
@@ -78,7 +78,7 @@ func TestInventoryPostgres_GetUserInventory(t *testing.T) {
 
 	tests := []struct {
 		name         string
-		userID       int
+		userID       int64
 		mockBehavior func()
 		wantError    error
 		wantData     []entity.InventoryItem
@@ -88,15 +88,15 @@ func TestInventoryPostgres_GetUserInventory(t *testing.T) {
 			userID: 1,
 			mockBehavior: func() {
 				rows := sqlmock.NewRows([]string{"type", "quantity"}).
-					AddRow("t-shirt", 2).
-					AddRow("cup", 1)
+					AddRow("t-shirt", int64(2)).
+					AddRow("cup", int64(1))
 
 				mock.ExpectQuery(`
 						SELECT mi.item_type AS type, COALESCE\(SUM\(i.quantity\), 0\) AS quantity
 						FROM inventory AS i
 						JOIN merch_items AS mi ON i.merch_id = mi.id
 						WHERE i.user_id = \$1 GROUP BY mi.item_type`).
-					WithArgs(1).
+					WithArgs(int64(1)).
 					WillReturnRows(rows)
 			},
 			wantError: nil,
@@ -114,7 +114,7 @@ func TestInventoryPostgres_GetUserInventory(t *testing.T) {
 						FROM inventory AS i
 						JOIN merch_items AS mi ON i.merch_id = mi.id
 						WHERE i.user_id = \$1 GROUP BY mi.item_type`).
-					WithArgs(1).
+					WithArgs(int64(1)).
 					WillReturnError(errors.New("query error"))
 			},
 			wantError: errors.New("query error"),
@@ -146,8 +146,8 @@ func TestInventoryPostgres_GetInventoryItem(t *testing.T) {
 
 	tests := []struct {
 		name         string
-		userID       int
-		merchID      int
+		userID       int64
+		merchID      int64
 		mockBehavior func()
 		wantError    error
 		wantData     int
@@ -157,10 +157,10 @@ func TestInventoryPostgres_GetInventoryItem(t *testing.T) {
 			userID:  1,
 			merchID: 2,
 			mockBehavior: func() {
-				rows := sqlmock.NewRows([]string{"quantity"}).AddRow(3)
+				rows := sqlmock.NewRows([]string{"quantity"}).AddRow(int64(3))
 
 				mock.ExpectQuery(`SELECT quantity FROM inventory WHERE user_id = \$1 AND merch_id = \$2`).
-					WithArgs(1, 2).
+					WithArgs(int64(1), int64(2)).
 					WillReturnRows(rows)
 			},
 			wantError: nil,
@@ -172,7 +172,7 @@ func TestInventoryPostgres_GetInventoryItem(t *testing.T) {
 			merchID: 2,
 			mockBehavior: func() {
 				mock.ExpectQuery(`SELECT quantity FROM inventory WHERE user_id = \$1 AND merch_id = \$2`).
-					WithArgs(1, 2).
+					WithArgs(int64(1), int64(2)).
 					WillReturnError(errors.New("query error"))
 			},
 			wantError: errors.New("query error"),
@@ -204,8 +204,8 @@ func TestInventoryPostgres_UpdateInventoryItem(t *testing.T) {
 
 	tests := []struct {
 		name         string
-		userID       int
-		merchID      int
+		userID       int64
+		merchID      int64
 		mockBehavior func()
 		wantError    error
 	}{
@@ -215,8 +215,8 @@ func TestInventoryPostgres_UpdateInventoryItem(t *testing.T) {
 			merchID: 2,
 			mockBehavior: func() {
 				mock.ExpectExec(`UPDATE inventory SET quantity = quantity \+ 1 WHERE user_id = \$1 AND merch_id = \$2`).
-					WithArgs(1, 2).
-					WillReturnResult(sqlmock.NewResult(1, 1)) // Успешное обновление одной строки
+					WithArgs(int64(1), int64(2)).
+					WillReturnResult(sqlmock.NewResult(1, 1))
 			},
 			wantError: nil,
 		},
@@ -226,7 +226,7 @@ func TestInventoryPostgres_UpdateInventoryItem(t *testing.T) {
 			merchID: 2,
 			mockBehavior: func() {
 				mock.ExpectExec(`UPDATE inventory SET quantity = quantity \+ 1 WHERE user_id = \$1 AND merch_id = \$2`).
-					WithArgs(1, 2).
+					WithArgs(int64(1), int64(2)).
 					WillReturnError(errors.New("query error"))
 			},
 			wantError: errors.New("query error"),
@@ -256,8 +256,8 @@ func TestInventoryPostgres_InsertInventoryItem(t *testing.T) {
 
 	tests := []struct {
 		name         string
-		userID       int
-		merchID      int
+		userID       int64
+		merchID      int64
 		mockBehavior func()
 		wantError    error
 	}{
@@ -267,8 +267,8 @@ func TestInventoryPostgres_InsertInventoryItem(t *testing.T) {
 			merchID: 2,
 			mockBehavior: func() {
 				mock.ExpectExec(`INSERT INTO inventory \(user_id, merch_id, quantity\) VALUES \(\$1, \$2, 1\)`).
-					WithArgs(1, 2).
-					WillReturnResult(sqlmock.NewResult(1, 1)) // Успешная вставка одной строки
+					WithArgs(int64(1), int64(2)).
+					WillReturnResult(sqlmock.NewResult(1, 1))
 			},
 			wantError: nil,
 		},
@@ -278,7 +278,7 @@ func TestInventoryPostgres_InsertInventoryItem(t *testing.T) {
 			merchID: 2,
 			mockBehavior: func() {
 				mock.ExpectExec(`INSERT INTO inventory \(user_id, merch_id, quantity\) VALUES \(\$1, \$2, 1\)`).
-					WithArgs(1, 2).
+					WithArgs(int64(1), int64(2)).
 					WillReturnError(errors.New("query error"))
 			},
 			wantError: errors.New("query error"),

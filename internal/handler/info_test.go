@@ -29,7 +29,7 @@ func TestHandler_GetInfo(t *testing.T) {
 
 	tests := []struct {
 		name         string
-		userID       int
+		userID       int64
 		mockBehavior func()
 		wantCode     int
 		wantBody     string
@@ -38,7 +38,7 @@ func TestHandler_GetInfo(t *testing.T) {
 			name:   "Success",
 			userID: 1,
 			mockBehavior: func() {
-				mockTransactionService.EXPECT().GetUserInfo(gomock.Any(), 1).Return(entity.InfoResponse{
+				mockTransactionService.EXPECT().GetUserInfo(gomock.Any(), int64(1)).Return(entity.InfoResponse{
 					Coins:     500,
 					Inventory: []entity.InventoryItem{{Type: "cup", Quantity: 1}},
 					CoinHistory: entity.CoinHistory{
@@ -54,7 +54,7 @@ func TestHandler_GetInfo(t *testing.T) {
 			name:   "Error fetching user info",
 			userID: 2,
 			mockBehavior: func() {
-				mockTransactionService.EXPECT().GetUserInfo(gomock.Any(), 2).Return(entity.InfoResponse{}, errors.New("db error"))
+				mockTransactionService.EXPECT().GetUserInfo(gomock.Any(), int64(2)).Return(entity.InfoResponse{}, errors.New("db error"))
 			},
 			wantCode: http.StatusInternalServerError,
 			wantBody: `{"errors":"db error"}`,

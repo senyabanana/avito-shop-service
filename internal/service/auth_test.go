@@ -8,7 +8,7 @@ import (
 
 	"github.com/senyabanana/avito-shop-service/internal/entity"
 	mocks "github.com/senyabanana/avito-shop-service/internal/repository/mocks"
-	
+
 	"github.com/DATA-DOG/go-sqlmock"
 	trmsqlx "github.com/avito-tech/go-transaction-manager/drivers/sqlx/v2"
 	"github.com/avito-tech/go-transaction-manager/trm/v2/manager"
@@ -22,7 +22,7 @@ import (
 const (
 	testUsername  = "testuser"
 	testPassword  = "testpassword"
-	testUserID    = 1
+	testUserID    = int64(1)
 	testJWTSecret = "supersecret"
 )
 
@@ -223,7 +223,7 @@ func TestAuthService_ParseToken(t *testing.T) {
 	tests := []struct {
 		name       string
 		token      string
-		wantUserID int
+		wantUserID int64
 		wantErr    error
 	}{
 		{

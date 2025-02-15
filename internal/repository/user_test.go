@@ -24,7 +24,7 @@ func TestUserPostgres_CreateUser(t *testing.T) {
 		name         string
 		inputUser    entity.User
 		mockBehavior func()
-		wantID       int
+		wantID       int64
 		wantError    error
 	}{
 		{
@@ -36,8 +36,8 @@ func TestUserPostgres_CreateUser(t *testing.T) {
 			},
 			mockBehavior: func() {
 				mock.ExpectQuery("INSERT INTO users").
-					WithArgs("testuser", "testpass", 1000).
-					WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
+					WithArgs("testuser", "testpass", int64(1000)).
+					WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(int64(1)))
 			},
 			wantID:    1,
 			wantError: nil,
@@ -51,7 +51,7 @@ func TestUserPostgres_CreateUser(t *testing.T) {
 			},
 			mockBehavior: func() {
 				mock.ExpectQuery("INSERT INTO users").
-					WithArgs("existuser", "testpass", 1000).
+					WithArgs("existuser", "testpass", int64(1000)).
 					WillReturnError(errors.New("pq: duplicate key value violates unique constraint"))
 			},
 			wantID:    0,
@@ -95,7 +95,7 @@ func TestUserPostgres_GetUser(t *testing.T) {
 				mock.ExpectQuery("SELECT id, username, users.password_hash, coins FROM users WHERE username").
 					WithArgs("testuser").
 					WillReturnRows(sqlmock.NewRows([]string{"id", "username", "password_hash", "coins"}).
-						AddRow(1, "testuser", "testpass", 1000))
+						AddRow(int64(1), "testuser", "testpass", int64(1000)))
 			},
 			wantUser: entity.User{
 				ID:       1,
@@ -142,9 +142,9 @@ func TestUserPostgres_GetUserBalance(t *testing.T) {
 
 	tests := []struct {
 		name         string
-		userID       int
+		userID       int64
 		mockBehavior func()
-		wantCoins    int
+		wantCoins    int64
 		wantError    error
 	}{
 		{
@@ -152,8 +152,8 @@ func TestUserPostgres_GetUserBalance(t *testing.T) {
 			userID: 1,
 			mockBehavior: func() {
 				mock.ExpectQuery("SELECT coins FROM users WHERE id").
-					WithArgs(1).
-					WillReturnRows(sqlmock.NewRows([]string{"coins"}).AddRow(500))
+					WithArgs(int64(1)).
+					WillReturnRows(sqlmock.NewRows([]string{"coins"}).AddRow(int64(500)))
 			},
 			wantCoins: 500,
 			wantError: nil,
@@ -195,8 +195,8 @@ func TestUserPostgres_UpdateCoins(t *testing.T) {
 
 	tests := []struct {
 		name         string
-		userID       int
-		amount       int
+		userID       int64
+		amount       int64
 		mockBehavior func()
 		wantError    error
 	}{
@@ -206,7 +206,7 @@ func TestUserPostgres_UpdateCoins(t *testing.T) {
 			amount: 50,
 			mockBehavior: func() {
 				mock.ExpectExec("UPDATE users SET coins = coins [+-]").
-					WithArgs(50, 1).
+					WithArgs(int64(50), int64(1)).
 					WillReturnResult(sqlmock.NewResult(1, 1))
 			},
 			wantError: nil,
@@ -217,7 +217,7 @@ func TestUserPostgres_UpdateCoins(t *testing.T) {
 			amount: -50,
 			mockBehavior: func() {
 				mock.ExpectExec("UPDATE users SET coins = coins [+-]").
-					WithArgs(-50, 1).
+					WithArgs(int64(-50), int64(1)).
 					WillReturnResult(sqlmock.NewResult(1, 1))
 			},
 			wantError: nil,
@@ -228,7 +228,7 @@ func TestUserPostgres_UpdateCoins(t *testing.T) {
 			amount: 1000,
 			mockBehavior: func() {
 				mock.ExpectExec("UPDATE users SET coins = coins [+-]").
-					WithArgs(1000, 2).
+					WithArgs(int64(1000), int64(2)).
 					WillReturnResult(sqlmock.NewResult(1, 0))
 			},
 			wantError: errors.New("insufficient balance"),

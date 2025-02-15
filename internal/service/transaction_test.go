@@ -34,7 +34,7 @@ func TestTransactionService_GetUserInfo(t *testing.T) {
 	tests := []struct {
 		name         string
 		mockBehavior func()
-		userID       int
+		userID       int64
 		wantInfo     entity.InfoResponse
 		wantErr      error
 	}{
@@ -43,10 +43,10 @@ func TestTransactionService_GetUserInfo(t *testing.T) {
 			userID: 1,
 			mockBehavior: func() {
 				mock.ExpectBegin()
-				mockUserRepo.EXPECT().GetUserBalance(gomock.Any(), 1).Return(100, nil)
-				mockInventoryRepo.EXPECT().GetUserInventory(gomock.Any(), 1).Return([]entity.InventoryItem{}, nil)
-				mockTransactionRepo.EXPECT().GetReceivedTransactions(gomock.Any(), 1).Return([]entity.TransactionDetail{}, nil)
-				mockTransactionRepo.EXPECT().GetSentTransactions(gomock.Any(), 1).Return([]entity.TransactionDetail{}, nil)
+				mockUserRepo.EXPECT().GetUserBalance(gomock.Any(), int64(1)).Return(int64(100), nil)
+				mockInventoryRepo.EXPECT().GetUserInventory(gomock.Any(), int64(1)).Return([]entity.InventoryItem{}, nil)
+				mockTransactionRepo.EXPECT().GetReceivedTransactions(gomock.Any(), int64(1)).Return([]entity.TransactionDetail{}, nil)
+				mockTransactionRepo.EXPECT().GetSentTransactions(gomock.Any(), int64(1)).Return([]entity.TransactionDetail{}, nil)
 				mock.ExpectCommit()
 			},
 			wantInfo: entity.InfoResponse{
@@ -61,7 +61,7 @@ func TestTransactionService_GetUserInfo(t *testing.T) {
 			userID: 2,
 			mockBehavior: func() {
 				mock.ExpectBegin()
-				mockUserRepo.EXPECT().GetUserBalance(gomock.Any(), 2).Return(0, errors.New("db error"))
+				mockUserRepo.EXPECT().GetUserBalance(gomock.Any(), int64(2)).Return(int64(0), errors.New("db error"))
 				mock.ExpectRollback()
 			},
 			wantInfo: entity.InfoResponse{},
@@ -72,8 +72,8 @@ func TestTransactionService_GetUserInfo(t *testing.T) {
 			userID: 3,
 			mockBehavior: func() {
 				mock.ExpectBegin()
-				mockUserRepo.EXPECT().GetUserBalance(gomock.Any(), 3).Return(100, nil)
-				mockInventoryRepo.EXPECT().GetUserInventory(gomock.Any(), 3).Return(nil, errors.New("inventory error"))
+				mockUserRepo.EXPECT().GetUserBalance(gomock.Any(), int64(3)).Return(int64(100), nil)
+				mockInventoryRepo.EXPECT().GetUserInventory(gomock.Any(), int64(3)).Return(nil, errors.New("inventory error"))
 				mock.ExpectRollback()
 			},
 			wantInfo: entity.InfoResponse{},
@@ -84,9 +84,9 @@ func TestTransactionService_GetUserInfo(t *testing.T) {
 			userID: 4,
 			mockBehavior: func() {
 				mock.ExpectBegin()
-				mockUserRepo.EXPECT().GetUserBalance(gomock.Any(), 4).Return(100, nil)
-				mockInventoryRepo.EXPECT().GetUserInventory(gomock.Any(), 4).Return([]entity.InventoryItem{}, nil)
-				mockTransactionRepo.EXPECT().GetReceivedTransactions(gomock.Any(), 4).Return(nil, errors.New("received transactions error"))
+				mockUserRepo.EXPECT().GetUserBalance(gomock.Any(), int64(4)).Return(int64(100), nil)
+				mockInventoryRepo.EXPECT().GetUserInventory(gomock.Any(), int64(4)).Return([]entity.InventoryItem{}, nil)
+				mockTransactionRepo.EXPECT().GetReceivedTransactions(gomock.Any(), int64(4)).Return(nil, errors.New("received transactions error"))
 				mock.ExpectRollback()
 			},
 			wantInfo: entity.InfoResponse{},
@@ -97,10 +97,10 @@ func TestTransactionService_GetUserInfo(t *testing.T) {
 			userID: 5,
 			mockBehavior: func() {
 				mock.ExpectBegin()
-				mockUserRepo.EXPECT().GetUserBalance(gomock.Any(), 5).Return(100, nil)
-				mockInventoryRepo.EXPECT().GetUserInventory(gomock.Any(), 5).Return([]entity.InventoryItem{}, nil)
-				mockTransactionRepo.EXPECT().GetReceivedTransactions(gomock.Any(), 5).Return([]entity.TransactionDetail{}, nil)
-				mockTransactionRepo.EXPECT().GetSentTransactions(gomock.Any(), 5).Return(nil, errors.New("sent transactions error"))
+				mockUserRepo.EXPECT().GetUserBalance(gomock.Any(), int64(5)).Return(int64(100), nil)
+				mockInventoryRepo.EXPECT().GetUserInventory(gomock.Any(), int64(5)).Return([]entity.InventoryItem{}, nil)
+				mockTransactionRepo.EXPECT().GetReceivedTransactions(gomock.Any(), int64(5)).Return([]entity.TransactionDetail{}, nil)
+				mockTransactionRepo.EXPECT().GetSentTransactions(gomock.Any(), int64(5)).Return(nil, errors.New("sent transactions error"))
 				mock.ExpectRollback()
 			},
 			wantInfo: entity.InfoResponse{},
@@ -111,10 +111,10 @@ func TestTransactionService_GetUserInfo(t *testing.T) {
 			userID: 6,
 			mockBehavior: func() {
 				mock.ExpectBegin()
-				mockUserRepo.EXPECT().GetUserBalance(gomock.Any(), 6).Return(50, nil)
-				mockInventoryRepo.EXPECT().GetUserInventory(gomock.Any(), 6).Return(nil, nil)
-				mockTransactionRepo.EXPECT().GetReceivedTransactions(gomock.Any(), 6).Return(nil, nil)
-				mockTransactionRepo.EXPECT().GetSentTransactions(gomock.Any(), 6).Return(nil, nil)
+				mockUserRepo.EXPECT().GetUserBalance(gomock.Any(), int64(6)).Return(int64(50), nil)
+				mockInventoryRepo.EXPECT().GetUserInventory(gomock.Any(), int64(6)).Return(nil, nil)
+				mockTransactionRepo.EXPECT().GetReceivedTransactions(gomock.Any(), int64(6)).Return(nil, nil)
+				mockTransactionRepo.EXPECT().GetSentTransactions(gomock.Any(), int64(6)).Return(nil, nil)
 				mock.ExpectCommit()
 			},
 			wantInfo: entity.InfoResponse{
@@ -155,9 +155,9 @@ func TestTransactionService_SendCoin(t *testing.T) {
 	tests := []struct {
 		name         string
 		mockBehavior func()
-		fromUserID   int
+		fromUserID   int64
 		toUsername   string
-		amount       int
+		amount       int64
 		wantErr      error
 	}{
 		{
@@ -168,10 +168,10 @@ func TestTransactionService_SendCoin(t *testing.T) {
 			mockBehavior: func() {
 				mock.ExpectBegin()
 				mockUserRepo.EXPECT().GetUser(gomock.Any(), "recipient").Return(entity.User{ID: 2, Username: "recipient"}, nil)
-				mockUserRepo.EXPECT().GetUserBalance(gomock.Any(), 1).Return(100, nil)
-				mockUserRepo.EXPECT().UpdateCoins(gomock.Any(), 1, -50).Return(nil)
-				mockUserRepo.EXPECT().UpdateCoins(gomock.Any(), 2, 50).Return(nil)
-				mockTransactionRepo.EXPECT().InsertTransaction(gomock.Any(), 1, 2, 50).Return(nil)
+				mockUserRepo.EXPECT().GetUserBalance(gomock.Any(), int64(1)).Return(int64(100), nil)
+				mockUserRepo.EXPECT().UpdateCoins(gomock.Any(), int64(1), int64(-50)).Return(nil)
+				mockUserRepo.EXPECT().UpdateCoins(gomock.Any(), int64(2), int64(50)).Return(nil)
+				mockTransactionRepo.EXPECT().InsertTransaction(gomock.Any(), int64(1), int64(2), int64(50)).Return(nil)
 				mock.ExpectCommit()
 			},
 			wantErr: nil,
@@ -208,7 +208,7 @@ func TestTransactionService_SendCoin(t *testing.T) {
 			mockBehavior: func() {
 				mock.ExpectBegin()
 				mockUserRepo.EXPECT().GetUser(gomock.Any(), "recipient").Return(entity.User{ID: 2, Username: "recipient"}, nil)
-				mockUserRepo.EXPECT().GetUserBalance(gomock.Any(), 1).Return(100, nil)
+				mockUserRepo.EXPECT().GetUserBalance(gomock.Any(), int64(1)).Return(int64(100), nil)
 				mock.ExpectRollback()
 			},
 			wantErr: entity.ErrInsufficientBalance,
@@ -221,7 +221,7 @@ func TestTransactionService_SendCoin(t *testing.T) {
 			mockBehavior: func() {
 				mock.ExpectBegin()
 				mockUserRepo.EXPECT().GetUser(gomock.Any(), "recipient").Return(entity.User{ID: 2, Username: "recipient"}, nil)
-				mockUserRepo.EXPECT().GetUserBalance(gomock.Any(), 1).Return(0, errors.New("db error"))
+				mockUserRepo.EXPECT().GetUserBalance(gomock.Any(), int64(1)).Return(int64(0), errors.New("db error"))
 				mock.ExpectRollback()
 			},
 			wantErr: errors.New("db error"),
@@ -234,8 +234,8 @@ func TestTransactionService_SendCoin(t *testing.T) {
 			mockBehavior: func() {
 				mock.ExpectBegin()
 				mockUserRepo.EXPECT().GetUser(gomock.Any(), "recipient").Return(entity.User{ID: 2, Username: "recipient"}, nil)
-				mockUserRepo.EXPECT().GetUserBalance(gomock.Any(), 1).Return(100, nil)
-				mockUserRepo.EXPECT().UpdateCoins(gomock.Any(), 1, -50).Return(errors.New("db error"))
+				mockUserRepo.EXPECT().GetUserBalance(gomock.Any(), int64(1)).Return(int64(100), nil)
+				mockUserRepo.EXPECT().UpdateCoins(gomock.Any(), int64(1), int64(-50)).Return(errors.New("db error"))
 				mock.ExpectRollback()
 			},
 			wantErr: errors.New("db error"),
@@ -248,9 +248,9 @@ func TestTransactionService_SendCoin(t *testing.T) {
 			mockBehavior: func() {
 				mock.ExpectBegin()
 				mockUserRepo.EXPECT().GetUser(gomock.Any(), "recipient").Return(entity.User{ID: 2, Username: "recipient"}, nil)
-				mockUserRepo.EXPECT().GetUserBalance(gomock.Any(), 1).Return(100, nil)
-				mockUserRepo.EXPECT().UpdateCoins(gomock.Any(), 1, -50).Return(nil)
-				mockUserRepo.EXPECT().UpdateCoins(gomock.Any(), 2, 50).Return(errors.New("db error"))
+				mockUserRepo.EXPECT().GetUserBalance(gomock.Any(), int64(1)).Return(int64(100), nil)
+				mockUserRepo.EXPECT().UpdateCoins(gomock.Any(), int64(1), int64(-50)).Return(nil)
+				mockUserRepo.EXPECT().UpdateCoins(gomock.Any(), int64(2), int64(50)).Return(errors.New("db error"))
 				mock.ExpectRollback()
 			},
 			wantErr: errors.New("db error"),
@@ -263,10 +263,10 @@ func TestTransactionService_SendCoin(t *testing.T) {
 			mockBehavior: func() {
 				mock.ExpectBegin()
 				mockUserRepo.EXPECT().GetUser(gomock.Any(), "recipient").Return(entity.User{ID: 2, Username: "recipient"}, nil)
-				mockUserRepo.EXPECT().GetUserBalance(gomock.Any(), 1).Return(100, nil)
-				mockUserRepo.EXPECT().UpdateCoins(gomock.Any(), 1, -50).Return(nil)
-				mockUserRepo.EXPECT().UpdateCoins(gomock.Any(), 2, 50).Return(nil)
-				mockTransactionRepo.EXPECT().InsertTransaction(gomock.Any(), 1, 2, 50).Return(errors.New("db error"))
+				mockUserRepo.EXPECT().GetUserBalance(gomock.Any(), int64(1)).Return(int64(100), nil)
+				mockUserRepo.EXPECT().UpdateCoins(gomock.Any(), int64(1), int64(-50)).Return(nil)
+				mockUserRepo.EXPECT().UpdateCoins(gomock.Any(), int64(2), int64(50)).Return(nil)
+				mockTransactionRepo.EXPECT().InsertTransaction(gomock.Any(), int64(1), int64(2), int64(50)).Return(errors.New("db error"))
 				mock.ExpectRollback()
 			},
 			wantErr: errors.New("db error"),

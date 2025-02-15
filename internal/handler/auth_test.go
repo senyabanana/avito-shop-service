@@ -4,12 +4,12 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"github.com/senyabanana/avito-shop-service/internal/service"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
 	"github.com/senyabanana/avito-shop-service/internal/entity"
+	"github.com/senyabanana/avito-shop-service/internal/service"
 	mocks "github.com/senyabanana/avito-shop-service/internal/service/mocks"
 
 	"github.com/gin-gonic/gin"
@@ -111,7 +111,7 @@ func TestHandler_Authenticate(t *testing.T) {
 			c.Request = req
 
 			handler.authenticate(c)
-			
+
 			assert.Equal(t, tt.wantCode, w.Code)
 			assert.JSONEq(t, tt.wantBody, w.Body.String())
 		})
