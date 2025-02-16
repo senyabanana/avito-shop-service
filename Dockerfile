@@ -7,7 +7,7 @@ RUN go mod download
 
 COPY . .
 
-RUN go build -o avito-shop-service ./cmd/main.go
+RUN go build -o avito-shop-service ./cmd/service/main.go
 
 FROM alpine
 

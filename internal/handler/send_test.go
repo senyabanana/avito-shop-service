@@ -81,16 +81,28 @@ func TestHandler_SendCoin(t *testing.T) {
 			wantBody:   `{"errors":"insufficient balance"}`,
 		},
 		{
+			name:        "Cannot send to self",
+			userID:      1,
+			requestBody: entity.SendCoinRequest{ToUser: "sender", Amount: 50},
+			mockBehavior: func() {
+				mockTransactionService.EXPECT().
+					SendCoin(gomock.Any(), int64(1), "sender", int64(50)).
+					Return(entity.ErrSendThemselves)
+			},
+			wantStatus: http.StatusBadRequest,
+			wantBody:   `{"errors":"cannot send coins to yourself"}`,
+		},
+		{
 			name:        "Transaction failure",
 			userID:      1,
 			requestBody: entity.SendCoinRequest{ToUser: "recipient", Amount: 50},
 			mockBehavior: func() {
 				mockTransactionService.EXPECT().
 					SendCoin(gomock.Any(), int64(1), "recipient", int64(50)).
-					Return(errors.New("transaction failed"))
+					Return(errors.New("internal server error"))
 			},
-			wantStatus: http.StatusBadRequest,
-			wantBody:   `{"errors":"transaction failed"}`,
+			wantStatus: http.StatusInternalServerError,
+			wantBody:   `{"errors":"internal server error"}`,
 		},
 	}
 

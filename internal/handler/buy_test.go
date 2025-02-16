@@ -85,10 +85,10 @@ func TestHandler_BuyItem(t *testing.T) {
 			mockBehavior: func() {
 				mockInventoryService.EXPECT().
 					BuyItem(gomock.Any(), int64(1), "cup").
-					Return(errors.New("transaction failed"))
+					Return(errors.New("internal server error"))
 			},
-			wantStatus: http.StatusBadRequest,
-			wantBody:   `{"errors":"transaction failed"}`,
+			wantStatus: http.StatusInternalServerError,
+			wantBody:   `{"errors":"internal server error"}`,
 		},
 	}
 

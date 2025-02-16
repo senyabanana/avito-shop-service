@@ -19,7 +19,7 @@ func (h *Handler) authenticate(c *gin.Context) {
 	_, err := h.services.Authorization.GetUser(c.Request.Context(), input.Username)
 	if err != nil {
 		if err := h.services.Authorization.CreateUser(c.Request.Context(), input.Username, input.Password); err != nil {
-			entity.NewErrorResponse(c, h.log, http.StatusBadRequest, err.Error())
+			entity.NewErrorResponse(c, h.log, http.StatusInternalServerError, err.Error())
 			return
 		}
 	}

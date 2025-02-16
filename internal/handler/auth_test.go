@@ -81,7 +81,7 @@ func TestHandler_Authenticate(t *testing.T) {
 				mockAuthService.EXPECT().CreateUser(gomock.Any(), "failuser", "failpass").Return(errors.New("creation failed"))
 				mockAuthService.EXPECT().GenerateToken(gomock.Any(), gomock.Any(), gomock.Any()).Times(0)
 			},
-			wantCode: http.StatusBadRequest,
+			wantCode: http.StatusInternalServerError,
 			wantBody: `{"errors":"creation failed"}`,
 		},
 		{

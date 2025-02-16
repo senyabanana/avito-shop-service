@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -22,7 +23,14 @@ func (h *Handler) buyItem(c *gin.Context) {
 
 	err = h.services.Inventory.BuyItem(c.Request.Context(), userID, item)
 	if err != nil {
-		entity.NewErrorResponse(c, h.log, http.StatusBadRequest, err.Error())
+		switch {
+		case errors.Is(err, entity.ErrItemNotFound):
+			entity.NewErrorResponse(c, h.log, http.StatusBadRequest, "item not found")
+		case errors.Is(err, entity.ErrInsufficientBalance):
+			entity.NewErrorResponse(c, h.log, http.StatusBadRequest, "insufficient balance")
+		default:
+			entity.NewErrorResponse(c, h.log, http.StatusInternalServerError, "internal server error")
+		}
 		return
 	}
 

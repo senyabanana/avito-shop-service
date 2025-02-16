@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -20,8 +21,18 @@ func (h *Handler) sendCoin(c *gin.Context) {
 		return
 	}
 
-	if err := h.services.Transaction.SendCoin(c.Request.Context(), userID, input.ToUser, input.Amount); err != nil {
-		entity.NewErrorResponse(c, h.log, http.StatusBadRequest, err.Error())
+	err = h.services.Transaction.SendCoin(c.Request.Context(), userID, input.ToUser, input.Amount)
+	if err != nil {
+		switch {
+		case errors.Is(err, entity.ErrRecipientNotFound):
+			entity.NewErrorResponse(c, h.log, http.StatusBadRequest, "recipient not found")
+		case errors.Is(err, entity.ErrSendThemselves):
+			entity.NewErrorResponse(c, h.log, http.StatusBadRequest, "cannot send coins to yourself")
+		case errors.Is(err, entity.ErrInsufficientBalance):
+			entity.NewErrorResponse(c, h.log, http.StatusBadRequest, "insufficient balance")
+		default:
+			entity.NewErrorResponse(c, h.log, http.StatusInternalServerError, "internal server error")
+		}
 		return
 	}
 

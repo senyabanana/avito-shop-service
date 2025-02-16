@@ -14,7 +14,7 @@ type ErrorResponse struct {
 func NewErrorResponse(c *gin.Context, log *logrus.Logger, statusCode int, message string) {
 	switch statusCode {
 	case http.StatusBadRequest:
-		log.Warnf("Client error (400): %s", message)
+		log.Warnf("Bad Request (400): %s", message)
 	case http.StatusUnauthorized:
 		log.Warnf("Unauthorized access (401): %s", message)
 	case http.StatusInternalServerError:
